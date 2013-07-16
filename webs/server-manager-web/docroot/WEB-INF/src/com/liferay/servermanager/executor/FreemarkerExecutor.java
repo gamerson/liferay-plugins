@@ -26,8 +26,8 @@ public class FreemarkerExecutor extends BaseExecutor {
 	protected Map<String, Executor> initNextExecutors() {
 		Map<String, Executor> executors = new HashMap<String, Executor>();
 
-		executors.put("fm-debug-password", new FMDebugPasswordExecutor());
-		executors.put("fm-debug-port", new FMDebugPortExecutor());
+		executors.put("debug-password", new FMDebugPasswordExecutor());
+		executors.put("debug-port", new FMDebugPortExecutor());
 
 		return executors;
 	}
