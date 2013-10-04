@@ -23,12 +23,13 @@
 			<artifact pattern="${sonatype.snapshot.url}/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]" />
 		</url>
 
-		<chain dual="true" name="default">
+		<chain dual="true" name="default">			
 			<resolver ref="jboss-nexus" />
 			<resolver ref="jboss-thirdparty" />
 			<resolver ref="maven2" />
 			<resolver ref="ow2-public" />
 			<resolver ref="primefaces" />
+			<resolver ref="local-m2" />
 		</chain>
 	</resolvers>
 </ivysettings>
