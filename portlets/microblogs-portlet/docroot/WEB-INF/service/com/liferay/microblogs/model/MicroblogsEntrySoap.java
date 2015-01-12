@@ -40,10 +40,11 @@ public class MicroblogsEntrySoap implements Serializable {
 		soapModel.setUserName(model.getUserName());
 		soapModel.setCreateDate(model.getCreateDate());
 		soapModel.setModifiedDate(model.getModifiedDate());
+		soapModel.setCreatorClassNameId(model.getCreatorClassNameId());
+		soapModel.setCreatorClassPK(model.getCreatorClassPK());
 		soapModel.setContent(model.getContent());
 		soapModel.setType(model.getType());
-		soapModel.setReceiverUserId(model.getReceiverUserId());
-		soapModel.setReceiverMicroblogsEntryId(model.getReceiverMicroblogsEntryId());
+		soapModel.setParentMicroblogsEntryId(model.getParentMicroblogsEntryId());
 		soapModel.setSocialRelationType(model.getSocialRelationType());
 
 		return soapModel;
@@ -147,6 +148,22 @@ public class MicroblogsEntrySoap implements Serializable {
 		_modifiedDate = modifiedDate;
 	}
 
+	public long getCreatorClassNameId() {
+		return _creatorClassNameId;
+	}
+
+	public void setCreatorClassNameId(long creatorClassNameId) {
+		_creatorClassNameId = creatorClassNameId;
+	}
+
+	public long getCreatorClassPK() {
+		return _creatorClassPK;
+	}
+
+	public void setCreatorClassPK(long creatorClassPK) {
+		_creatorClassPK = creatorClassPK;
+	}
+
 	public String getContent() {
 		return _content;
 	}
@@ -163,20 +180,12 @@ public class MicroblogsEntrySoap implements Serializable {
 		_type = type;
 	}
 
-	public long getReceiverUserId() {
-		return _receiverUserId;
+	public long getParentMicroblogsEntryId() {
+		return _parentMicroblogsEntryId;
 	}
 
-	public void setReceiverUserId(long receiverUserId) {
-		_receiverUserId = receiverUserId;
-	}
-
-	public long getReceiverMicroblogsEntryId() {
-		return _receiverMicroblogsEntryId;
-	}
-
-	public void setReceiverMicroblogsEntryId(long receiverMicroblogsEntryId) {
-		_receiverMicroblogsEntryId = receiverMicroblogsEntryId;
+	public void setParentMicroblogsEntryId(long parentMicroblogsEntryId) {
+		_parentMicroblogsEntryId = parentMicroblogsEntryId;
 	}
 
 	public int getSocialRelationType() {
@@ -193,9 +202,10 @@ public class MicroblogsEntrySoap implements Serializable {
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;
+	private long _creatorClassNameId;
+	private long _creatorClassPK;
 	private String _content;
 	private int _type;
-	private long _receiverUserId;
-	private long _receiverMicroblogsEntryId;
+	private long _parentMicroblogsEntryId;
 	private int _socialRelationType;
 }

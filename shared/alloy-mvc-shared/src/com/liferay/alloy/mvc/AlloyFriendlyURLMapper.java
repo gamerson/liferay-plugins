@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.util.PortalUtil;
 
 import java.util.HashMap;
@@ -40,7 +41,7 @@ public class AlloyFriendlyURLMapper extends DefaultFriendlyURLMapper {
 
 	@Override
 	public String buildPath(LiferayPortletURL liferayPortletURL) {
-		Map<String, String> routeParameters = new HashMap<String, String>();
+		Map<String, String> routeParameters = new HashMap<>();
 
 		buildRouteParameters(liferayPortletURL, routeParameters);
 
@@ -105,7 +106,7 @@ public class AlloyFriendlyURLMapper extends DefaultFriendlyURLMapper {
 				0, friendlyURLPath.length() - 1);
 		}
 
-		Map<String, String> routeParameters = new HashMap<String, String>();
+		Map<String, String> routeParameters = new HashMap<>();
 
 		if (!router.urlToParameters(friendlyURLPath, routeParameters)) {
 			if (_log.isWarnEnabled()) {
@@ -126,6 +127,12 @@ public class AlloyFriendlyURLMapper extends DefaultFriendlyURLMapper {
 
 		addParameter(namespace, parameterMap, "p_p_id", portletId);
 		addParameter(parameterMap, "p_p_lifecycle", getLifecycle(request));
+
+		String format = routeParameters.get("format");
+
+		if (Validator.isNotNull(format)) {
+			addParameter(parameterMap, "p_p_state", "exclusive");
+		}
 
 		populateParams(parameterMap, namespace, routeParameters);
 	}

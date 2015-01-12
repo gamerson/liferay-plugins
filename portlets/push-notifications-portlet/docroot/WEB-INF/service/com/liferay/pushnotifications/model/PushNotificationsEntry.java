@@ -21,7 +21,7 @@ import com.liferay.portal.model.PersistedModel;
 /**
  * The extended model interface for the PushNotificationsEntry service. Represents a row in the &quot;PushNotificationsEntry&quot; database table, with each column mapped to a property of this class.
  *
- * @author Silvio Santos
+ * @author Bruno Farache
  * @see PushNotificationsEntryModel
  * @see com.liferay.pushnotifications.model.impl.PushNotificationsEntryImpl
  * @see com.liferay.pushnotifications.model.impl.PushNotificationsEntryModelImpl
@@ -35,4 +35,9 @@ public interface PushNotificationsEntry extends PushNotificationsEntryModel,
 	 *
 	 * Never modify this interface directly. Add methods to {@link com.liferay.pushnotifications.model.impl.PushNotificationsEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
+	@com.liferay.portal.kernel.json.JSON()
+	public com.liferay.portal.kernel.json.JSONObject getUser();
+
+	public void setUser(
+		com.liferay.portal.kernel.json.JSONObject userJSONObject);
 }

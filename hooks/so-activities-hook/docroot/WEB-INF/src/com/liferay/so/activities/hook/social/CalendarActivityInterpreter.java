@@ -17,6 +17,7 @@ package com.liferay.so.activities.hook.social;
 import com.liferay.calendar.model.CalendarBooking;
 import com.liferay.calendar.service.CalendarBookingLocalServiceUtil;
 import com.liferay.calendar.service.permission.CalendarPermission;
+import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -33,7 +34,10 @@ import com.liferay.portlet.social.service.SocialActivityLocalServiceUtil;
 import com.liferay.portlet.social.service.SocialActivitySetLocalServiceUtil;
 import com.liferay.so.activities.util.SocialActivityKeyConstants;
 
+import java.text.DateFormat;
 import java.text.Format;
+
+import java.util.TimeZone;
 
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletURL;
@@ -113,11 +117,21 @@ public class CalendarActivityInterpreter extends SOSocialActivityInterpreter {
 		sb.append(serviceContext.translate("date"));
 		sb.append(": </strong>");
 
-		Format dateFormatDate = getFormatDateTime(
-			serviceContext.getLocale(), serviceContext.getTimeZone());
-
 		CalendarBooking calendarBooking =
 			CalendarBookingLocalServiceUtil.fetchCalendarBooking(classPK);
+
+		Format dateFormatDate = null;
+
+		if (calendarBooking.isAllDay()) {
+			dateFormatDate = FastDateFormatFactoryUtil.getDateTime(
+				DateFormat.FULL, DateFormat.SHORT, serviceContext.getLocale(),
+				TimeZone.getTimeZone(StringPool.UTC));
+		}
+		else {
+			dateFormatDate = FastDateFormatFactoryUtil.getDateTime(
+				DateFormat.FULL, DateFormat.SHORT, serviceContext.getLocale(),
+				serviceContext.getTimeZone());
+		}
 
 		sb.append(dateFormatDate.format(calendarBooking.getStartTime()));
 

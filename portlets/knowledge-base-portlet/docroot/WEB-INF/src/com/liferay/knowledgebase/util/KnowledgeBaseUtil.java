@@ -95,7 +95,7 @@ public class KnowledgeBaseUtil {
 			RenderResponse renderResponse)
 		throws PortalException {
 
-		Map<String, Object> parameters = new HashMap<String, Object>();
+		Map<String, Object> parameters = new HashMap<>();
 
 		parameters.put(
 			"oldParentResourceClassNameId", oldParentResourceClassNameId);
@@ -113,7 +113,7 @@ public class KnowledgeBaseUtil {
 			RenderResponse renderResponse)
 		throws PortalException {
 
-		Map<String, Object> parameters = new HashMap<String, Object>();
+		Map<String, Object> parameters = new HashMap<>();
 
 		parameters.put("parentResourceClassNameId", parentResourceClassNameId);
 		parameters.put("parentResourcePrimKey", parentResourcePrimKey);
@@ -129,7 +129,7 @@ public class KnowledgeBaseUtil {
 		List<KBFolder> kbFolders = KBFolderServiceUtil.getKBFolders(
 			groupId, kbFolderId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 
-		kbFolders = new ArrayList<KBFolder>(kbFolders);
+		kbFolders = new ArrayList<>(kbFolders);
 
 		Iterator<KBFolder> itr = kbFolders.iterator();
 
@@ -435,7 +435,7 @@ public class KnowledgeBaseUtil {
 		}
 		else {
 			throw new IllegalArgumentException(
-				String.format("Invalid feedback status %s", status));
+				String.format("Invalid suggestion status %s", status));
 		}
 	}
 
@@ -451,7 +451,7 @@ public class KnowledgeBaseUtil {
 		}
 		else {
 			throw new IllegalArgumentException(
-				String.format("Invalid feedback status %s", status));
+				String.format("Invalid suggestion status %s", status));
 		}
 	}
 
@@ -485,7 +485,7 @@ public class KnowledgeBaseUtil {
 	public static List<KBArticle> sort(
 		long[] resourcePrimKeys, List<KBArticle> kbArticles) {
 
-		Map<Long, KBArticle> map = new HashMap<Long, KBArticle>();
+		Map<Long, KBArticle> map = new HashMap<>();
 
 		for (KBArticle kbArticle : kbArticles) {
 			map.put(kbArticle.getResourcePrimKey(), kbArticle);
@@ -503,7 +503,7 @@ public class KnowledgeBaseUtil {
 	}
 
 	public static String[] splitKeywords(String keywords) {
-		Set<String> keywordsSet = new LinkedHashSet<String>();
+		Set<String> keywordsSet = new LinkedHashSet<>();
 
 		StringBundler sb = new StringBundler();
 
@@ -612,13 +612,13 @@ public class KnowledgeBaseUtil {
 		PortalPreferences portalPreferences =
 			PortletPreferencesFactoryUtil.getPortalPreferences(portletRequest);
 
-		String kbFolderUrlTitle = portalPreferences.getValue(
-			PortletKeys.KNOWLEDGE_BASE_DISPLAY, "preferredKBFolderUrlTitle",
+		String kbFolderURLTitle = portalPreferences.getValue(
+			PortletKeys.KNOWLEDGE_BASE_DISPLAY, "preferredKBFolderURLTitle",
 			null);
 
 		long childKbFolderId = KBFolderConstants.DEFAULT_PARENT_FOLDER_ID;
 
-		if (kbFolderUrlTitle == null) {
+		if (kbFolderURLTitle == null) {
 			List<KBFolder> kbFolders = getAlternateRootKBFolders(
 				groupId, kbFolderId);
 
@@ -630,7 +630,7 @@ public class KnowledgeBaseUtil {
 		}
 		else {
 			KBFolder kbFolder = KBFolderServiceUtil.fetchKBFolderByUrlTitle(
-				groupId, kbFolderId, kbFolderUrlTitle);
+				groupId, kbFolderId, kbFolderURLTitle);
 
 			if (kbFolder != null) {
 				childKbFolderId = kbFolder.getKbFolderId();

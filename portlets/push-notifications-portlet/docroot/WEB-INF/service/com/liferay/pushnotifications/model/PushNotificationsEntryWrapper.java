@@ -19,7 +19,6 @@ import aQute.bnd.annotation.ProviderType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +27,7 @@ import java.util.Map;
  * This class is a wrapper for {@link PushNotificationsEntry}.
  * </p>
  *
- * @author Silvio Santos
+ * @author Bruno Farache
  * @see PushNotificationsEntry
  * @generated
  */
@@ -56,10 +55,13 @@ public class PushNotificationsEntryWrapper implements PushNotificationsEntry,
 
 		attributes.put("pushNotificationsEntryId", getPushNotificationsEntryId());
 		attributes.put("userId", getUserId());
-		attributes.put("createDate", getCreateDate());
+		attributes.put("createTime", getCreateTime());
 		attributes.put("parentPushNotificationsEntryId",
 			getParentPushNotificationsEntryId());
+		attributes.put("childrenPushNotificationsEntriesCount",
+			getChildrenPushNotificationsEntriesCount());
 		attributes.put("payload", getPayload());
+		attributes.put("ratingsTotalScore", getRatingsTotalScore());
 
 		return attributes;
 	}
@@ -79,10 +81,10 @@ public class PushNotificationsEntryWrapper implements PushNotificationsEntry,
 			setUserId(userId);
 		}
 
-		Date createDate = (Date)attributes.get("createDate");
+		Long createTime = (Long)attributes.get("createTime");
 
-		if (createDate != null) {
-			setCreateDate(createDate);
+		if (createTime != null) {
+			setCreateTime(createTime);
 		}
 
 		Long parentPushNotificationsEntryId = (Long)attributes.get(
@@ -92,10 +94,23 @@ public class PushNotificationsEntryWrapper implements PushNotificationsEntry,
 			setParentPushNotificationsEntryId(parentPushNotificationsEntryId);
 		}
 
+		Integer childrenPushNotificationsEntriesCount = (Integer)attributes.get(
+				"childrenPushNotificationsEntriesCount");
+
+		if (childrenPushNotificationsEntriesCount != null) {
+			setChildrenPushNotificationsEntriesCount(childrenPushNotificationsEntriesCount);
+		}
+
 		String payload = (String)attributes.get("payload");
 
 		if (payload != null) {
 			setPayload(payload);
+		}
+
+		Long ratingsTotalScore = (Long)attributes.get("ratingsTotalScore");
+
+		if (ratingsTotalScore != null) {
+			setRatingsTotalScore(ratingsTotalScore);
 		}
 	}
 
@@ -111,13 +126,23 @@ public class PushNotificationsEntryWrapper implements PushNotificationsEntry,
 	}
 
 	/**
-	* Returns the create date of this push notifications entry.
+	* Returns the children push notifications entries count of this push notifications entry.
 	*
-	* @return the create date of this push notifications entry
+	* @return the children push notifications entries count of this push notifications entry
 	*/
 	@Override
-	public java.util.Date getCreateDate() {
-		return _pushNotificationsEntry.getCreateDate();
+	public int getChildrenPushNotificationsEntriesCount() {
+		return _pushNotificationsEntry.getChildrenPushNotificationsEntriesCount();
+	}
+
+	/**
+	* Returns the create time of this push notifications entry.
+	*
+	* @return the create time of this push notifications entry
+	*/
+	@Override
+	public long getCreateTime() {
+		return _pushNotificationsEntry.getCreateTime();
 	}
 
 	@Override
@@ -171,6 +196,21 @@ public class PushNotificationsEntryWrapper implements PushNotificationsEntry,
 	}
 
 	/**
+	* Returns the ratings total score of this push notifications entry.
+	*
+	* @return the ratings total score of this push notifications entry
+	*/
+	@Override
+	public long getRatingsTotalScore() {
+		return _pushNotificationsEntry.getRatingsTotalScore();
+	}
+
+	@Override
+	public com.liferay.portal.kernel.json.JSONObject getUser() {
+		return _pushNotificationsEntry.getUser();
+	}
+
+	/**
 	* Returns the user ID of this push notifications entry.
 	*
 	* @return the user ID of this push notifications entry
@@ -221,13 +261,24 @@ public class PushNotificationsEntryWrapper implements PushNotificationsEntry,
 	}
 
 	/**
-	* Sets the create date of this push notifications entry.
+	* Sets the children push notifications entries count of this push notifications entry.
 	*
-	* @param createDate the create date of this push notifications entry
+	* @param childrenPushNotificationsEntriesCount the children push notifications entries count of this push notifications entry
 	*/
 	@Override
-	public void setCreateDate(java.util.Date createDate) {
-		_pushNotificationsEntry.setCreateDate(createDate);
+	public void setChildrenPushNotificationsEntriesCount(
+		int childrenPushNotificationsEntriesCount) {
+		_pushNotificationsEntry.setChildrenPushNotificationsEntriesCount(childrenPushNotificationsEntriesCount);
+	}
+
+	/**
+	* Sets the create time of this push notifications entry.
+	*
+	* @param createTime the create time of this push notifications entry
+	*/
+	@Override
+	public void setCreateTime(long createTime) {
+		_pushNotificationsEntry.setCreateTime(createTime);
 	}
 
 	@Override
@@ -297,6 +348,22 @@ public class PushNotificationsEntryWrapper implements PushNotificationsEntry,
 	@Override
 	public void setPushNotificationsEntryId(long pushNotificationsEntryId) {
 		_pushNotificationsEntry.setPushNotificationsEntryId(pushNotificationsEntryId);
+	}
+
+	/**
+	* Sets the ratings total score of this push notifications entry.
+	*
+	* @param ratingsTotalScore the ratings total score of this push notifications entry
+	*/
+	@Override
+	public void setRatingsTotalScore(long ratingsTotalScore) {
+		_pushNotificationsEntry.setRatingsTotalScore(ratingsTotalScore);
+	}
+
+	@Override
+	public void setUser(
+		com.liferay.portal.kernel.json.JSONObject userJSONObject) {
+		_pushNotificationsEntry.setUser(userJSONObject);
 	}
 
 	/**

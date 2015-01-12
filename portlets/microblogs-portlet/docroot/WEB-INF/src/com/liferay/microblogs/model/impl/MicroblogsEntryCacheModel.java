@@ -41,7 +41,7 @@ public class MicroblogsEntryCacheModel implements CacheModel<MicroblogsEntry>,
 	Externalizable {
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(23);
+		StringBundler sb = new StringBundler(25);
 
 		sb.append("{microblogsEntryId=");
 		sb.append(microblogsEntryId);
@@ -55,14 +55,16 @@ public class MicroblogsEntryCacheModel implements CacheModel<MicroblogsEntry>,
 		sb.append(createDate);
 		sb.append(", modifiedDate=");
 		sb.append(modifiedDate);
+		sb.append(", creatorClassNameId=");
+		sb.append(creatorClassNameId);
+		sb.append(", creatorClassPK=");
+		sb.append(creatorClassPK);
 		sb.append(", content=");
 		sb.append(content);
 		sb.append(", type=");
 		sb.append(type);
-		sb.append(", receiverUserId=");
-		sb.append(receiverUserId);
-		sb.append(", receiverMicroblogsEntryId=");
-		sb.append(receiverMicroblogsEntryId);
+		sb.append(", parentMicroblogsEntryId=");
+		sb.append(parentMicroblogsEntryId);
 		sb.append(", socialRelationType=");
 		sb.append(socialRelationType);
 		sb.append("}");
@@ -99,6 +101,9 @@ public class MicroblogsEntryCacheModel implements CacheModel<MicroblogsEntry>,
 			microblogsEntryImpl.setModifiedDate(new Date(modifiedDate));
 		}
 
+		microblogsEntryImpl.setCreatorClassNameId(creatorClassNameId);
+		microblogsEntryImpl.setCreatorClassPK(creatorClassPK);
+
 		if (content == null) {
 			microblogsEntryImpl.setContent(StringPool.BLANK);
 		}
@@ -107,8 +112,7 @@ public class MicroblogsEntryCacheModel implements CacheModel<MicroblogsEntry>,
 		}
 
 		microblogsEntryImpl.setType(type);
-		microblogsEntryImpl.setReceiverUserId(receiverUserId);
-		microblogsEntryImpl.setReceiverMicroblogsEntryId(receiverMicroblogsEntryId);
+		microblogsEntryImpl.setParentMicroblogsEntryId(parentMicroblogsEntryId);
 		microblogsEntryImpl.setSocialRelationType(socialRelationType);
 
 		microblogsEntryImpl.resetOriginalValues();
@@ -124,10 +128,11 @@ public class MicroblogsEntryCacheModel implements CacheModel<MicroblogsEntry>,
 		userName = objectInput.readUTF();
 		createDate = objectInput.readLong();
 		modifiedDate = objectInput.readLong();
+		creatorClassNameId = objectInput.readLong();
+		creatorClassPK = objectInput.readLong();
 		content = objectInput.readUTF();
 		type = objectInput.readInt();
-		receiverUserId = objectInput.readLong();
-		receiverMicroblogsEntryId = objectInput.readLong();
+		parentMicroblogsEntryId = objectInput.readLong();
 		socialRelationType = objectInput.readInt();
 	}
 
@@ -147,6 +152,8 @@ public class MicroblogsEntryCacheModel implements CacheModel<MicroblogsEntry>,
 
 		objectOutput.writeLong(createDate);
 		objectOutput.writeLong(modifiedDate);
+		objectOutput.writeLong(creatorClassNameId);
+		objectOutput.writeLong(creatorClassPK);
 
 		if (content == null) {
 			objectOutput.writeUTF(StringPool.BLANK);
@@ -156,8 +163,7 @@ public class MicroblogsEntryCacheModel implements CacheModel<MicroblogsEntry>,
 		}
 
 		objectOutput.writeInt(type);
-		objectOutput.writeLong(receiverUserId);
-		objectOutput.writeLong(receiverMicroblogsEntryId);
+		objectOutput.writeLong(parentMicroblogsEntryId);
 		objectOutput.writeInt(socialRelationType);
 	}
 
@@ -167,9 +173,10 @@ public class MicroblogsEntryCacheModel implements CacheModel<MicroblogsEntry>,
 	public String userName;
 	public long createDate;
 	public long modifiedDate;
+	public long creatorClassNameId;
+	public long creatorClassPK;
 	public String content;
 	public int type;
-	public long receiverUserId;
-	public long receiverMicroblogsEntryId;
+	public long parentMicroblogsEntryId;
 	public int socialRelationType;
 }

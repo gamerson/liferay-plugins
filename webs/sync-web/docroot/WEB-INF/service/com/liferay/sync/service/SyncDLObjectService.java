@@ -137,6 +137,15 @@ public interface SyncDLObjectService extends BaseService, InvokableService {
 	public javax.portlet.PortletPreferences getPortletPreferences()
 		throws com.liferay.portal.kernel.exception.PortalException;
 
+	@com.liferay.portal.security.ac.AccessControlled(guestAccessEnabled = true)
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public com.liferay.sync.model.SyncContext getSyncContext()
+		throws com.liferay.portal.kernel.exception.PortalException;
+
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link #getSyncContext()}
+	*/
+	@java.lang.Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public com.liferay.sync.model.SyncContext getSyncContext(
 		java.lang.String uuid)
@@ -202,6 +211,11 @@ public interface SyncDLObjectService extends BaseService, InvokableService {
 	* @param beanIdentifier the Spring bean ID for this bean
 	*/
 	public void setBeanIdentifier(java.lang.String beanIdentifier);
+
+	@com.liferay.portal.kernel.transaction.Transactional(enabled = false)
+	public java.util.Map<java.lang.String, java.lang.Object> updateFileEntries(
+		java.io.File zipFile)
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public com.liferay.sync.model.SyncDLObject updateFileEntry(
 		long fileEntryId, java.lang.String sourceFileName,

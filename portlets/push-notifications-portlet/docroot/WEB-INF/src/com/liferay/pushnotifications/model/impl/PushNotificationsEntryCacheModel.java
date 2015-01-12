@@ -27,12 +27,10 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-import java.util.Date;
-
 /**
  * The cache model class for representing PushNotificationsEntry in entity cache.
  *
- * @author Silvio Santos
+ * @author Bruno Farache
  * @see PushNotificationsEntry
  * @generated
  */
@@ -41,18 +39,22 @@ public class PushNotificationsEntryCacheModel implements CacheModel<PushNotifica
 	Externalizable {
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(11);
+		StringBundler sb = new StringBundler(15);
 
 		sb.append("{pushNotificationsEntryId=");
 		sb.append(pushNotificationsEntryId);
 		sb.append(", userId=");
 		sb.append(userId);
-		sb.append(", createDate=");
-		sb.append(createDate);
+		sb.append(", createTime=");
+		sb.append(createTime);
 		sb.append(", parentPushNotificationsEntryId=");
 		sb.append(parentPushNotificationsEntryId);
+		sb.append(", childrenPushNotificationsEntriesCount=");
+		sb.append(childrenPushNotificationsEntriesCount);
 		sb.append(", payload=");
 		sb.append(payload);
+		sb.append(", ratingsTotalScore=");
+		sb.append(ratingsTotalScore);
 		sb.append("}");
 
 		return sb.toString();
@@ -64,15 +66,9 @@ public class PushNotificationsEntryCacheModel implements CacheModel<PushNotifica
 
 		pushNotificationsEntryImpl.setPushNotificationsEntryId(pushNotificationsEntryId);
 		pushNotificationsEntryImpl.setUserId(userId);
-
-		if (createDate == Long.MIN_VALUE) {
-			pushNotificationsEntryImpl.setCreateDate(null);
-		}
-		else {
-			pushNotificationsEntryImpl.setCreateDate(new Date(createDate));
-		}
-
+		pushNotificationsEntryImpl.setCreateTime(createTime);
 		pushNotificationsEntryImpl.setParentPushNotificationsEntryId(parentPushNotificationsEntryId);
+		pushNotificationsEntryImpl.setChildrenPushNotificationsEntriesCount(childrenPushNotificationsEntriesCount);
 
 		if (payload == null) {
 			pushNotificationsEntryImpl.setPayload(StringPool.BLANK);
@@ -80,6 +76,8 @@ public class PushNotificationsEntryCacheModel implements CacheModel<PushNotifica
 		else {
 			pushNotificationsEntryImpl.setPayload(payload);
 		}
+
+		pushNotificationsEntryImpl.setRatingsTotalScore(ratingsTotalScore);
 
 		pushNotificationsEntryImpl.resetOriginalValues();
 
@@ -90,9 +88,11 @@ public class PushNotificationsEntryCacheModel implements CacheModel<PushNotifica
 	public void readExternal(ObjectInput objectInput) throws IOException {
 		pushNotificationsEntryId = objectInput.readLong();
 		userId = objectInput.readLong();
-		createDate = objectInput.readLong();
+		createTime = objectInput.readLong();
 		parentPushNotificationsEntryId = objectInput.readLong();
+		childrenPushNotificationsEntriesCount = objectInput.readInt();
 		payload = objectInput.readUTF();
+		ratingsTotalScore = objectInput.readLong();
 	}
 
 	@Override
@@ -100,8 +100,9 @@ public class PushNotificationsEntryCacheModel implements CacheModel<PushNotifica
 		throws IOException {
 		objectOutput.writeLong(pushNotificationsEntryId);
 		objectOutput.writeLong(userId);
-		objectOutput.writeLong(createDate);
+		objectOutput.writeLong(createTime);
 		objectOutput.writeLong(parentPushNotificationsEntryId);
+		objectOutput.writeInt(childrenPushNotificationsEntriesCount);
 
 		if (payload == null) {
 			objectOutput.writeUTF(StringPool.BLANK);
@@ -109,11 +110,15 @@ public class PushNotificationsEntryCacheModel implements CacheModel<PushNotifica
 		else {
 			objectOutput.writeUTF(payload);
 		}
+
+		objectOutput.writeLong(ratingsTotalScore);
 	}
 
 	public long pushNotificationsEntryId;
 	public long userId;
-	public long createDate;
+	public long createTime;
 	public long parentPushNotificationsEntryId;
+	public int childrenPushNotificationsEntriesCount;
 	public String payload;
+	public long ratingsTotalScore;
 }

@@ -53,6 +53,7 @@ import com.liferay.portal.kernel.notifications.UserNotificationManagerUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletResponseUtil;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -92,7 +93,6 @@ import com.liferay.portlet.social.model.SocialRequestConstants;
 import com.liferay.portlet.social.service.SocialRelationLocalServiceUtil;
 import com.liferay.portlet.social.service.SocialRequestLocalServiceUtil;
 import com.liferay.portlet.usersadmin.util.UsersAdminUtil;
-import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -209,7 +209,7 @@ public class ContactsCenterPortlet extends MVCPortlet {
 		long[] userIds = StringUtil.split(
 			ParamUtil.getString(resourceRequest, "userIds"), 0L);
 
-		List<User> users = new ArrayList<User>(userIds.length);
+		List<User> users = new ArrayList<>(userIds.length);
 
 		for (long userId : userIds) {
 			User user = UserServiceUtil.getUserById(userId);
@@ -805,8 +805,7 @@ public class ContactsCenterPortlet extends MVCPortlet {
 			}
 		}
 		else {
-			LinkedHashMap<String, Object> params =
-				new LinkedHashMap<String, Object>();
+			LinkedHashMap<String, Object> params = new LinkedHashMap<>();
 
 			params.put("inherit", Boolean.TRUE);
 
@@ -850,7 +849,7 @@ public class ContactsCenterPortlet extends MVCPortlet {
 						new Long(siteAdministratorRole.getRoleId())
 					});
 
-				Set<User> users = new HashSet<User>();
+				Set<User> users = new HashSet<>();
 
 				users.addAll(
 					UserLocalServiceUtil.search(
@@ -876,7 +875,7 @@ public class ContactsCenterPortlet extends MVCPortlet {
 						QueryUtil.ALL_POS, QueryUtil.ALL_POS,
 						(OrderByComparator)null));
 
-				usersList = new ArrayList<User>(users);
+				usersList = new ArrayList<>(users);
 
 				ListUtil.sort(usersList, new UserLastNameComparator(true));
 			}

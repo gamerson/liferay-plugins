@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.zip.ZipReader;
 import com.liferay.portal.kernel.zip.ZipReaderFactoryUtil;
 import com.liferay.portal.service.ServiceContext;
@@ -100,11 +101,18 @@ public class KBArticleImporter {
 
 		try {
 			if (kbArticle == null) {
+				int workflowAction = serviceContext.getWorkflowAction();
+
+				serviceContext.setWorkflowAction(
+					WorkflowConstants.ACTION_SAVE_DRAFT);
+
 				kbArticle = KBArticleLocalServiceUtil.addKBArticle(
 					userId, parentResourceClassNameId, parentResourcePrimaryKey,
 					kbArticleMarkdownConverter.getTitle(), urlTitle, markdown,
 					null, kbArticleMarkdownConverter.getSourceURL(), null, null,
 					serviceContext);
+
+				serviceContext.setWorkflowAction(workflowAction);
 			}
 		}
 		catch (Exception e) {
@@ -146,8 +154,7 @@ public class KBArticleImporter {
 	protected Map<String, List<String>> getFolderNameFileEntryNamesMap(
 		ZipReader zipReader) {
 
-		Map<String, List<String>> folderNameFileEntryNamesMap =
-			new TreeMap<String, List<String>>();
+		Map<String, List<String>> folderNameFileEntryNamesMap = new TreeMap<>();
 
 		for (String zipEntry : zipReader.getEntries()) {
 			String extension = FileUtil.getExtension(zipEntry);
@@ -166,7 +173,7 @@ public class KBArticleImporter {
 				folderName);
 
 			if (fileEntryNames == null) {
-				fileEntryNames = new ArrayList<String>();
+				fileEntryNames = new ArrayList<>();
 			}
 
 			fileEntryNames.add(zipEntry);
@@ -193,8 +200,7 @@ public class KBArticleImporter {
 
 			properties.load(inputStream);
 
-			Map<String, String> metadata = new HashMap<String, String>(
-				properties.size());
+			Map<String, String> metadata = new HashMap<>(properties.size());
 
 			for (Object key : properties.keySet()) {
 				Object value = properties.get(key);
@@ -231,7 +237,7 @@ public class KBArticleImporter {
 
 			String sectionIntroFileEntryName = null;
 
-			List<String> sectionFileEntryNames = new ArrayList<String>();
+			List<String> sectionFileEntryNames = new ArrayList<>();
 
 			for (String fileEntryName : fileEntryNames) {
 				if (fileEntryName.endsWith(

@@ -68,7 +68,8 @@ public abstract class BaseImporter implements Importer {
 				layoutSetPrototype =
 					LayoutSetPrototypeLocalServiceUtil.addLayoutSetPrototype(
 						userId, companyId, getTargetValueMap(),
-						StringPool.BLANK, true, true, new ServiceContext());
+						new HashMap<Locale, String>(), true, true,
+						new ServiceContext());
 			}
 
 			group = layoutSetPrototype.getGroup();
@@ -141,12 +142,17 @@ public abstract class BaseImporter implements Importer {
 	}
 
 	@Override
+	public String getTargetClassName() {
+		return targetClassName;
+	}
+
+	@Override
 	public long getTargetClassPK() {
 		return targetClassPK;
 	}
 
 	public Map<Locale, String> getTargetValueMap() {
-		Map<Locale, String> targetValueMap = new HashMap<Locale, String>();
+		Map<Locale, String> targetValueMap = new HashMap<>();
 
 		Locale locale = LocaleUtil.getDefault();
 
@@ -167,8 +173,18 @@ public abstract class BaseImporter implements Importer {
 	}
 
 	@Override
+	public boolean isDeveloperModeEnabled() {
+		return developerModeEnabled;
+	}
+
+	@Override
 	public boolean isExisting() {
 		return existing;
+	}
+
+	@Override
+	public void setAppendVersion(boolean appendVersion) {
+		this.appendVersion = appendVersion;
 	}
 
 	@Override
@@ -256,6 +272,7 @@ public abstract class BaseImporter implements Importer {
 		return null;
 	}
 
+	protected boolean appendVersion;
 	protected long companyId;
 	protected boolean developerModeEnabled;
 	protected boolean existing;

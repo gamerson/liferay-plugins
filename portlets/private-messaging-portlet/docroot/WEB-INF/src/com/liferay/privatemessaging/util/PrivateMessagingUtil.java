@@ -23,7 +23,13 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.search.BaseModelSearchResult;
+import com.liferay.portal.kernel.search.Sort;
+import com.liferay.portal.kernel.search.SortFactoryUtil;
 import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Group;
@@ -61,14 +67,12 @@ public class PrivateMessagingUtil {
 
 		User user = UserLocalServiceUtil.getUser(userId);
 
-		LinkedHashMap<String, Object> params =
-			new LinkedHashMap<String, Object>();
+		LinkedHashMap<String, Object> params = new LinkedHashMap<>();
 
 		if (type.equals("site")) {
 			params.put("inherit", Boolean.TRUE);
 
-			LinkedHashMap<String, Object> groupParams =
-				new LinkedHashMap<String, Object>();
+			LinkedHashMap<String, Object> groupParams = new LinkedHashMap<>();
 
 			groupParams.put("inherit", Boolean.FALSE);
 			groupParams.put("site", Boolean.TRUE);
@@ -104,15 +108,33 @@ public class PrivateMessagingUtil {
 		catch (NoSuchRoleException nsre) {
 		}
 
-		int total = UserLocalServiceUtil.searchCount(
-			user.getCompanyId(), keywords, WorkflowConstants.STATUS_APPROVED,
-			params);
+		List<User> users = new ArrayList<>();
 
-		jsonObject.put("total", total);
+		if (_USERS_INDEXER_ENABLED && _USERS_SEARCH_WITH_INDEX) {
+			Sort sort = SortFactoryUtil.getSort(User.class, "firstName", "asc");
 
-		List<User> users = UserLocalServiceUtil.search(
-			user.getCompanyId(), keywords, WorkflowConstants.STATUS_APPROVED,
-			params, start, end, new UserFirstNameComparator(true));
+			BaseModelSearchResult<User> baseModelSearchResult =
+				UserLocalServiceUtil.searchUsers(
+					user.getCompanyId(), keywords, keywords, keywords, keywords,
+					keywords, WorkflowConstants.STATUS_APPROVED, params, false,
+					start, end, sort);
+
+			jsonObject.put("total", baseModelSearchResult.getLength());
+
+			users = baseModelSearchResult.getBaseModels();
+		}
+		else {
+			int total = UserLocalServiceUtil.searchCount(
+				user.getCompanyId(), keywords,
+				WorkflowConstants.STATUS_APPROVED, params);
+
+			jsonObject.put("total", total);
+
+			users = UserLocalServiceUtil.search(
+				user.getCompanyId(), keywords,
+				WorkflowConstants.STATUS_APPROVED, params, start, end,
+				new UserFirstNameComparator(true));
+		}
 
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
@@ -179,7 +201,7 @@ public class PrivateMessagingUtil {
 	public static List<User> getThreadUsers(long userId, long mbThreadId)
 		throws PortalException {
 
-		List<User> users = new ArrayList<User>();
+		List<User> users = new ArrayList<>();
 
 		// Users who have contributed to the thread
 
@@ -244,5 +266,11 @@ public class PrivateMessagingUtil {
 			return false;
 		}
 	}
+
+	private static final boolean _USERS_INDEXER_ENABLED = GetterUtil.getBoolean(
+		PropsUtil.get(PropsKeys.USERS_INDEXER_ENABLED));
+
+	private static final boolean _USERS_SEARCH_WITH_INDEX =
+		GetterUtil.getBoolean(PropsUtil.get(PropsKeys.USERS_SEARCH_WITH_INDEX));
 
 }

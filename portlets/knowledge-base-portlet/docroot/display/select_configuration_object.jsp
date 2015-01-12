@@ -46,7 +46,7 @@ String eventName = PortalUtil.getPortletNamespace(PortletKeys.PORTLET_CONFIGURAT
 			</c:choose>
 
 			<%
-			Map<String, Object> data = new HashMap<>();
+			Map<String, Object> data = new HashMap<String, Object>();
 
 			data.put("resourceClassNameId", kbFolderClassNameId);
 			data.put("resourcePrimKey", KBFolderConstants.DEFAULT_PARENT_FOLDER_ID);
@@ -68,7 +68,6 @@ String eventName = PortalUtil.getPortletNamespace(PortletKeys.PORTLET_CONFIGURAT
 		showGuestGroup="<%= false %>"
 		showLayout="<%= false %>"
 		showParentGroups="<%= false %>"
-		showPortletBreadcrumb="<%= false %>"
 	/>
 
 	<c:if test="<%= parentResourceClassNameId == kbFolderClassNameId %>">
@@ -126,12 +125,12 @@ String eventName = PortalUtil.getPortletNamespace(PortletKeys.PORTLET_CONFIGURAT
 				>
 
 					<%
-					Map<String, Object> data = new HashMap<>();
+					Map<String, Object> data = new HashMap<String, Object>();
 
 					data.put("priority", KBArticleConstants.DEFAULT_PRIORITY);
 					data.put("resourceClassNameId", kbFolder.getClassNameId());
 					data.put("resourcePrimKey", kbFolder.getKbFolderId());
-					data.put("title", HtmlUtil.escapeAttribute(kbFolder.getName()));
+					data.put("title", kbFolder.getName());
 					%>
 
 					<aui:button
@@ -236,11 +235,11 @@ String eventName = PortalUtil.getPortletNamespace(PortletKeys.PORTLET_CONFIGURAT
 			>
 
 				<%
-				Map<String, Object> data = new HashMap<>();
+				Map<String, Object> data = new HashMap<String, Object>();
 
 				data.put("resourceClassNameId", kbArticle.getClassNameId());
 				data.put("resourcePrimKey", kbArticle.getResourcePrimKey());
-				data.put("title", HtmlUtil.escapeAttribute(kbArticle.getTitle()));
+				data.put("title", kbArticle.getTitle());
 				%>
 
 				<aui:button cssClass="selector-button" data="<%= data %>" value="choose" />

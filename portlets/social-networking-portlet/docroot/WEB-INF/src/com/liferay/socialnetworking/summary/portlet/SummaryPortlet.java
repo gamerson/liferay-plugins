@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -46,7 +47,6 @@ import com.liferay.portlet.social.service.SocialRelationLocalServiceUtil;
 import com.liferay.portlet.social.service.SocialRequestLocalServiceUtil;
 import com.liferay.socialnetworking.friends.social.FriendsRequestKeys;
 import com.liferay.socialnetworking.members.social.MembersRequestKeys;
-import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -121,8 +121,7 @@ public class SummaryPortlet extends MVCPortlet {
 		Role siteAdminRole = RoleLocalServiceUtil.getRole(
 			themeDisplay.getCompanyId(), RoleConstants.SITE_ADMINISTRATOR);
 
-		LinkedHashMap<String, Object> userParams =
-			new LinkedHashMap<String, Object>();
+		LinkedHashMap<String, Object> userParams = new LinkedHashMap<>();
 
 		userParams.put(
 			"userGroupRole",
@@ -173,8 +172,7 @@ public class SummaryPortlet extends MVCPortlet {
 		Role role = RoleLocalServiceUtil.getRole(
 			themeDisplay.getCompanyId(), "Organization Administrator");
 
-		LinkedHashMap<String, Object> userParams =
-			new LinkedHashMap<String, Object>();
+		LinkedHashMap<String, Object> userParams = new LinkedHashMap<>();
 
 		userParams.put(
 			"userGroupRole", new Long[] {group.getGroupId(), role.getRoleId()});

@@ -34,12 +34,11 @@ import java.io.Serializable;
 
 import java.lang.reflect.Method;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Silvio Santos
+ * @author Bruno Farache
  */
 @ProviderType
 public class PushNotificationsEntryClp extends BaseModelImpl<PushNotificationsEntry>
@@ -83,10 +82,13 @@ public class PushNotificationsEntryClp extends BaseModelImpl<PushNotificationsEn
 
 		attributes.put("pushNotificationsEntryId", getPushNotificationsEntryId());
 		attributes.put("userId", getUserId());
-		attributes.put("createDate", getCreateDate());
+		attributes.put("createTime", getCreateTime());
 		attributes.put("parentPushNotificationsEntryId",
 			getParentPushNotificationsEntryId());
+		attributes.put("childrenPushNotificationsEntriesCount",
+			getChildrenPushNotificationsEntriesCount());
 		attributes.put("payload", getPayload());
+		attributes.put("ratingsTotalScore", getRatingsTotalScore());
 
 		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
 		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
@@ -109,10 +111,10 @@ public class PushNotificationsEntryClp extends BaseModelImpl<PushNotificationsEn
 			setUserId(userId);
 		}
 
-		Date createDate = (Date)attributes.get("createDate");
+		Long createTime = (Long)attributes.get("createTime");
 
-		if (createDate != null) {
-			setCreateDate(createDate);
+		if (createTime != null) {
+			setCreateTime(createTime);
 		}
 
 		Long parentPushNotificationsEntryId = (Long)attributes.get(
@@ -122,10 +124,23 @@ public class PushNotificationsEntryClp extends BaseModelImpl<PushNotificationsEn
 			setParentPushNotificationsEntryId(parentPushNotificationsEntryId);
 		}
 
+		Integer childrenPushNotificationsEntriesCount = (Integer)attributes.get(
+				"childrenPushNotificationsEntriesCount");
+
+		if (childrenPushNotificationsEntriesCount != null) {
+			setChildrenPushNotificationsEntriesCount(childrenPushNotificationsEntriesCount);
+		}
+
 		String payload = (String)attributes.get("payload");
 
 		if (payload != null) {
 			setPayload(payload);
+		}
+
+		Long ratingsTotalScore = (Long)attributes.get("ratingsTotalScore");
+
+		if (ratingsTotalScore != null) {
+			setRatingsTotalScore(ratingsTotalScore);
 		}
 
 		_entityCacheEnabled = GetterUtil.getBoolean("entityCacheEnabled");
@@ -197,21 +212,21 @@ public class PushNotificationsEntryClp extends BaseModelImpl<PushNotificationsEn
 	}
 
 	@Override
-	public Date getCreateDate() {
-		return _createDate;
+	public long getCreateTime() {
+		return _createTime;
 	}
 
 	@Override
-	public void setCreateDate(Date createDate) {
-		_createDate = createDate;
+	public void setCreateTime(long createTime) {
+		_createTime = createTime;
 
 		if (_pushNotificationsEntryRemoteModel != null) {
 			try {
 				Class<?> clazz = _pushNotificationsEntryRemoteModel.getClass();
 
-				Method method = clazz.getMethod("setCreateDate", Date.class);
+				Method method = clazz.getMethod("setCreateTime", long.class);
 
-				method.invoke(_pushNotificationsEntryRemoteModel, createDate);
+				method.invoke(_pushNotificationsEntryRemoteModel, createTime);
 			}
 			catch (Exception e) {
 				throw new UnsupportedOperationException(e);
@@ -246,6 +261,32 @@ public class PushNotificationsEntryClp extends BaseModelImpl<PushNotificationsEn
 	}
 
 	@Override
+	public int getChildrenPushNotificationsEntriesCount() {
+		return _childrenPushNotificationsEntriesCount;
+	}
+
+	@Override
+	public void setChildrenPushNotificationsEntriesCount(
+		int childrenPushNotificationsEntriesCount) {
+		_childrenPushNotificationsEntriesCount = childrenPushNotificationsEntriesCount;
+
+		if (_pushNotificationsEntryRemoteModel != null) {
+			try {
+				Class<?> clazz = _pushNotificationsEntryRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setChildrenPushNotificationsEntriesCount",
+						int.class);
+
+				method.invoke(_pushNotificationsEntryRemoteModel,
+					childrenPushNotificationsEntriesCount);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
+	}
+
+	@Override
 	public String getPayload() {
 		return _payload;
 	}
@@ -265,6 +306,69 @@ public class PushNotificationsEntryClp extends BaseModelImpl<PushNotificationsEn
 			catch (Exception e) {
 				throw new UnsupportedOperationException(e);
 			}
+		}
+	}
+
+	@Override
+	public long getRatingsTotalScore() {
+		return _ratingsTotalScore;
+	}
+
+	@Override
+	public void setRatingsTotalScore(long ratingsTotalScore) {
+		_ratingsTotalScore = ratingsTotalScore;
+
+		if (_pushNotificationsEntryRemoteModel != null) {
+			try {
+				Class<?> clazz = _pushNotificationsEntryRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setRatingsTotalScore",
+						long.class);
+
+				method.invoke(_pushNotificationsEntryRemoteModel,
+					ratingsTotalScore);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
+	}
+
+	@Override
+	public void setUser(
+		com.liferay.portal.kernel.json.JSONObject userJSONObject) {
+		try {
+			String methodName = "setUser";
+
+			Class<?>[] parameterTypes = new Class<?>[] {
+					com.liferay.portal.kernel.json.JSONObject.class
+				};
+
+			Object[] parameterValues = new Object[] { userJSONObject };
+
+			invokeOnRemoteModel(methodName, parameterTypes, parameterValues);
+		}
+		catch (Exception e) {
+			throw new UnsupportedOperationException(e);
+		}
+	}
+
+	@Override
+	public com.liferay.portal.kernel.json.JSONObject getUser() {
+		try {
+			String methodName = "getUser";
+
+			Class<?>[] parameterTypes = new Class<?>[] {  };
+
+			Object[] parameterValues = new Object[] {  };
+
+			com.liferay.portal.kernel.json.JSONObject returnObj = (com.liferay.portal.kernel.json.JSONObject)invokeOnRemoteModel(methodName,
+					parameterTypes, parameterValues);
+
+			return returnObj;
+		}
+		catch (Exception e) {
+			throw new UnsupportedOperationException(e);
 		}
 	}
 
@@ -341,26 +445,34 @@ public class PushNotificationsEntryClp extends BaseModelImpl<PushNotificationsEn
 
 		clone.setPushNotificationsEntryId(getPushNotificationsEntryId());
 		clone.setUserId(getUserId());
-		clone.setCreateDate(getCreateDate());
+		clone.setCreateTime(getCreateTime());
 		clone.setParentPushNotificationsEntryId(getParentPushNotificationsEntryId());
+		clone.setChildrenPushNotificationsEntriesCount(getChildrenPushNotificationsEntriesCount());
 		clone.setPayload(getPayload());
+		clone.setRatingsTotalScore(getRatingsTotalScore());
 
 		return clone;
 	}
 
 	@Override
 	public int compareTo(PushNotificationsEntry pushNotificationsEntry) {
-		long primaryKey = pushNotificationsEntry.getPrimaryKey();
+		int value = 0;
 
-		if (getPrimaryKey() < primaryKey) {
-			return -1;
+		if (getCreateTime() < pushNotificationsEntry.getCreateTime()) {
+			value = -1;
 		}
-		else if (getPrimaryKey() > primaryKey) {
-			return 1;
+		else if (getCreateTime() > pushNotificationsEntry.getCreateTime()) {
+			value = 1;
 		}
 		else {
-			return 0;
+			value = 0;
 		}
+
+		if (value != 0) {
+			return value;
+		}
+
+		return 0;
 	}
 
 	@Override
@@ -406,18 +518,22 @@ public class PushNotificationsEntryClp extends BaseModelImpl<PushNotificationsEn
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(11);
+		StringBundler sb = new StringBundler(15);
 
 		sb.append("{pushNotificationsEntryId=");
 		sb.append(getPushNotificationsEntryId());
 		sb.append(", userId=");
 		sb.append(getUserId());
-		sb.append(", createDate=");
-		sb.append(getCreateDate());
+		sb.append(", createTime=");
+		sb.append(getCreateTime());
 		sb.append(", parentPushNotificationsEntryId=");
 		sb.append(getParentPushNotificationsEntryId());
+		sb.append(", childrenPushNotificationsEntriesCount=");
+		sb.append(getChildrenPushNotificationsEntriesCount());
 		sb.append(", payload=");
 		sb.append(getPayload());
+		sb.append(", ratingsTotalScore=");
+		sb.append(getRatingsTotalScore());
 		sb.append("}");
 
 		return sb.toString();
@@ -425,7 +541,7 @@ public class PushNotificationsEntryClp extends BaseModelImpl<PushNotificationsEn
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(19);
+		StringBundler sb = new StringBundler(25);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.pushnotifications.model.PushNotificationsEntry");
@@ -440,16 +556,24 @@ public class PushNotificationsEntryClp extends BaseModelImpl<PushNotificationsEn
 		sb.append(getUserId());
 		sb.append("]]></column-value></column>");
 		sb.append(
-			"<column><column-name>createDate</column-name><column-value><![CDATA[");
-		sb.append(getCreateDate());
+			"<column><column-name>createTime</column-name><column-value><![CDATA[");
+		sb.append(getCreateTime());
 		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>parentPushNotificationsEntryId</column-name><column-value><![CDATA[");
 		sb.append(getParentPushNotificationsEntryId());
 		sb.append("]]></column-value></column>");
 		sb.append(
+			"<column><column-name>childrenPushNotificationsEntriesCount</column-name><column-value><![CDATA[");
+		sb.append(getChildrenPushNotificationsEntriesCount());
+		sb.append("]]></column-value></column>");
+		sb.append(
 			"<column><column-name>payload</column-name><column-value><![CDATA[");
 		sb.append(getPayload());
+		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>ratingsTotalScore</column-name><column-value><![CDATA[");
+		sb.append(getRatingsTotalScore());
 		sb.append("]]></column-value></column>");
 
 		sb.append("</model>");
@@ -459,9 +583,11 @@ public class PushNotificationsEntryClp extends BaseModelImpl<PushNotificationsEn
 
 	private long _pushNotificationsEntryId;
 	private long _userId;
-	private Date _createDate;
+	private long _createTime;
 	private long _parentPushNotificationsEntryId;
+	private int _childrenPushNotificationsEntriesCount;
 	private String _payload;
+	private long _ratingsTotalScore;
 	private BaseModel<?> _pushNotificationsEntryRemoteModel;
 	private Class<?> _clpSerializerClass = com.liferay.pushnotifications.service.ClpSerializer.class;
 	private boolean _entityCacheEnabled;

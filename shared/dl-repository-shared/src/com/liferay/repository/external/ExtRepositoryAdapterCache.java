@@ -103,8 +103,7 @@ public class ExtRepositoryAdapterCache implements Cloneable {
 		_getExtRepositoryAdapters() {
 
 		if (_extRepositoryAdapters == null) {
-			_extRepositoryAdapters =
-				new HashMap<String, ExtRepositoryModelAdapter<?>>();
+			_extRepositoryAdapters = new HashMap<>();
 		}
 
 		return _extRepositoryAdapters;
@@ -119,7 +118,6 @@ public class ExtRepositoryAdapterCache implements Cloneable {
 				ExtRepositoryAdapterCache.class.getName(),
 				new ExtRepositoryAdapterCache());
 
-	private Map<String, ExtRepositoryModelAdapter<?>>
-		_extRepositoryAdapters;
+	private Map<String, ExtRepositoryModelAdapter<?>> _extRepositoryAdapters;
 
 }

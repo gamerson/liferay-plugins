@@ -168,6 +168,30 @@ public class WorkflowTaskManagerImpl implements WorkflowTaskManager {
 	}
 
 	@Override
+	public WorkflowTask fetchWorkflowTask(
+			long companyId, long workflowTaskInstanceId)
+		throws WorkflowException {
+
+		KaleoTaskInstanceToken kaleoTaskInstanceToken =
+			KaleoTaskInstanceTokenLocalServiceUtil.fetchKaleoTaskInstanceToken(
+				workflowTaskInstanceId);
+
+		if (kaleoTaskInstanceToken == null) {
+			return null;
+		}
+
+		try {
+			return WorkflowModelUtil.toWorkflowTask(
+				kaleoTaskInstanceToken,
+				WorkflowContextUtil.convert(
+					kaleoTaskInstanceToken.getWorkflowContext()));
+		}
+		catch (Exception e) {
+			throw new WorkflowException(e);
+		}
+	}
+
+	@Override
 	public List<String> getNextTransitionNames(
 			long companyId, long userId, long workflowTaskInstanceId)
 		throws WorkflowException {
@@ -187,7 +211,7 @@ public class WorkflowTaskManagerImpl implements WorkflowTaskManager {
 			List<KaleoTransition> kaleoTransitions =
 				kaleoNode.getKaleoTransitions();
 
-			List<String> transitionNames = new ArrayList<String>(
+			List<String> transitionNames = new ArrayList<>(
 				kaleoTransitions.size());
 
 			for (KaleoTransition kaleoTransition : kaleoTransitions) {
@@ -748,7 +772,7 @@ public class WorkflowTaskManagerImpl implements WorkflowTaskManager {
 			List<KaleoTaskInstanceToken> kaleoTaskInstanceTokens)
 		throws PortalException {
 
-		List<WorkflowTask> workflowTasks = new ArrayList<WorkflowTask>(
+		List<WorkflowTask> workflowTasks = new ArrayList<>(
 			kaleoTaskInstanceTokens.size());
 
 		for (KaleoTaskInstanceToken kaleoTaskInstanceToken :

@@ -51,7 +51,7 @@ String orderByType = ParamUtil.getString(request, "orderByType", "desc");
 				</c:choose>
 
 				<%
-				Map<String, Object> data = new HashMap<>();
+				Map<String, Object> data = new HashMap<String, Object>();
 
 				data.put("priority", KBArticleConstants.DEFAULT_PRIORITY);
 				data.put("resourceClassNameId", kbFolderClassNameId);
@@ -74,7 +74,6 @@ String orderByType = ParamUtil.getString(request, "orderByType", "desc");
 			showGuestGroup="<%= false %>"
 			showLayout="<%= false %>"
 			showParentGroups="<%= false %>"
-			showPortletBreadcrumb="<%= false %>"
 		/>
 
 		<liferay-portlet:renderURL varImpl="iteratorURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
@@ -148,12 +147,12 @@ String orderByType = ParamUtil.getString(request, "orderByType", "desc");
 					>
 
 						<%
-						Map<String, Object> data = new HashMap<>();
+						Map<String, Object> data = new HashMap<String, Object>();
 
 						data.put("priority", KBArticleConstants.DEFAULT_PRIORITY);
 						data.put("resourceClassNameId", kbFolder.getClassNameId());
 						data.put("resourcePrimKey", kbFolder.getKbFolderId());
-						data.put("title", HtmlUtil.escapeAttribute(kbFolder.getName()));
+						data.put("title", kbFolder.getName());
 						%>
 
 						<aui:button
@@ -233,12 +232,12 @@ String orderByType = ParamUtil.getString(request, "orderByType", "desc");
 				>
 
 					<%
-					Map<String, Object> data = new HashMap<>();
+					Map<String, Object> data = new HashMap<String, Object>();
 
 					data.put("priority", curKBArticle.getPriority());
 					data.put("resourceClassNameId", curKBArticle.getClassNameId());
 					data.put("resourcePrimKey", curKBArticle.getResourcePrimKey());
-					data.put("title", HtmlUtil.escapeAttribute(curKBArticle.getTitle()));
+					data.put("title", curKBArticle.getTitle());
 					%>
 
 					<aui:button

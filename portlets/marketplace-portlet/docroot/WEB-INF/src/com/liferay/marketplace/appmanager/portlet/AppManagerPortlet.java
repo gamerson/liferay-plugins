@@ -16,6 +16,7 @@ package com.liferay.marketplace.appmanager.portlet;
 
 import com.liferay.marketplace.service.AppServiceUtil;
 import com.liferay.portal.kernel.deploy.DeployManagerUtil;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.servlet.ServletContextPool;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
@@ -23,7 +24,6 @@ import com.liferay.portal.kernel.upload.UploadException;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
-import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Http;
@@ -46,7 +46,6 @@ import com.liferay.portal.service.PluginSettingServiceUtil;
 import com.liferay.portal.service.PortletServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
-import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -281,13 +280,7 @@ public class AppManagerPortlet extends MVCPortlet {
 
 			options.setFollowRedirects(false);
 			options.setLocation(url);
-			options.setPortletRequest(actionRequest);
 			options.setPost(false);
-
-			String progressId = ParamUtil.getString(
-				uploadPortletRequest, Constants.PROGRESS_ID);
-
-			options.setProgressId(progressId);
 
 			byte[] bytes = HttpUtil.URLtoByteArray(options);
 

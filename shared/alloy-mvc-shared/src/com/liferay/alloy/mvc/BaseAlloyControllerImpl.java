@@ -18,6 +18,9 @@ import com.liferay.counter.service.CounterLocalServiceUtil;
 import com.liferay.portal.kernel.bean.BeanPropertiesUtil;
 import com.liferay.portal.kernel.bean.ConstantsBeanFactoryUtil;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
+import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -31,12 +34,12 @@ import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.PortletBag;
 import com.liferay.portal.kernel.portlet.PortletBagPool;
-import com.liferay.portal.kernel.portlet.PortletResponseUtil;
 import com.liferay.portal.kernel.scheduler.CronText;
 import com.liferay.portal.kernel.scheduler.CronTrigger;
 import com.liferay.portal.kernel.scheduler.SchedulerEngineHelperUtil;
 import com.liferay.portal.kernel.scheduler.StorageType;
 import com.liferay.portal.kernel.scheduler.Trigger;
+import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.Indexer;
@@ -58,6 +61,7 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.ServiceBeanMethodInvocationFactoryUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.AttachedModel;
@@ -71,10 +75,13 @@ import com.liferay.portal.model.User;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 
 import java.lang.reflect.Method;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -143,36 +150,7 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 		}
 
 		if (lifecycle.equals(PortletRequest.ACTION_PHASE)) {
-			Class<?> superClass = clazz.getSuperclass();
-
-			Method executeActionMethod = superClass.getDeclaredMethod(
-				"executeAction", new Class<?>[] {Method.class});
-
-			try {
-				ServiceBeanMethodInvocationFactoryUtil.proceed(
-					this, BaseAlloyControllerImpl.class, executeActionMethod,
-					new Object[] {method}, new String[] {"transactionAdvice"});
-			}
-			catch (Exception e) {
-				log.error(e, e);
-
-				actionRequest.setAttribute(
-					CALLED_PROCESS_ACTION, Boolean.TRUE.toString());
-
-				String message = "an-unexpected-system-error-occurred";
-
-				Throwable rootCause = getRootCause(e);
-
-				if (rootCause instanceof AlloyException) {
-					message = rootCause.getMessage();
-				}
-
-				renderError(message);
-
-				actionRequest.setAttribute(VIEW_PATH, viewPath);
-
-				PortalUtil.copyRequestParameters(actionRequest, actionResponse);
-			}
+			executeAction(method);
 		}
 		else if (lifecycle.equals(PortletRequest.RENDER_PHASE)) {
 			executeRender(method);
@@ -181,10 +159,12 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 			executeResource(method);
 		}
 
-		if (alloyNotificationEventHelper != null) {
+		if ((alloyNotificationEventHelper != null) &&
+			!viewPath.equals(_VIEW_PATH_ERROR)) {
+
 			alloyNotificationEventHelper.addUserNotificationEvents(
 				request, controllerPath, actionPath,
-				alloyNotificationEventHelperPayload);
+				alloyNotificationEventHelperPayloadJSONObject);
 		}
 	}
 
@@ -288,6 +268,28 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 		indexModel(baseModel);
 	}
 
+	protected void addOpenerSuccessMessage() {
+		Map<String, String> data = (Map<String, String>)SessionMessages.get(
+			request,
+			portlet.getPortletId() +
+				SessionMessages.KEY_SUFFIX_REFRESH_PORTLET_DATA);
+
+		if ((data == null) ||
+			!GetterUtil.getBoolean(data.get("addSuccessMessage"))) {
+
+			return;
+		}
+
+		addSuccessMessage();
+
+		data.put("addSuccessMessage", StringPool.FALSE);
+
+		SessionMessages.add(
+			request,
+			portlet.getPortletId() +
+				SessionMessages.KEY_SUFFIX_REFRESH_PORTLET_DATA, data);
+	}
+
 	protected void addSuccessMessage() {
 		String successMessage = ParamUtil.getString(
 			portletRequest, "successMessage");
@@ -300,16 +302,20 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 	}
 
 	protected String buildIncludePath(String viewPath) {
-		if (viewPath.equals(_VIEW_PATH_ERROR)) {
-			return "/WEB-INF/jsp/".concat(
-				portlet.getFriendlyURLMapping()).concat("/views/error.jsp");
-		}
-
-		StringBundler sb = new StringBundler(7);
+		StringBundler sb = new StringBundler(4);
 
 		sb.append("/WEB-INF/jsp/");
 		sb.append(portlet.getFriendlyURLMapping());
 		sb.append("/views/");
+
+		if (viewPath.equals(_VIEW_PATH_ERROR)) {
+			sb.append("error.jsp");
+
+			return sb.toString();
+		}
+
+		sb = new StringBundler(new String[] {sb.toString()}, 4);
+
 		sb.append(controllerPath);
 		sb.append(StringPool.SLASH);
 		sb.append(viewPath);
@@ -322,18 +328,41 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 		return null;
 	}
 
+	protected String buildResponseContent(
+			Object data, String message, int status)
+		throws Exception {
+
+		String responseContent = StringPool.BLANK;
+
+		if (isRespondingTo("json")) {
+			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+
+			if (data instanceof Exception) {
+				String stackTrace = getStackTrace((Exception)data);
+
+				jsonObject.put("data", stackTrace);
+			}
+			else {
+				jsonObject.put(
+					"data",
+					JSONFactoryUtil.createJSONObject(String.valueOf(data)));
+			}
+
+			jsonObject.put("message", message);
+			jsonObject.put("status", status);
+
+			responseContent = jsonObject.toString();
+		}
+
+		return responseContent;
+	}
+
 	protected MessageListener buildSchedulerMessageListener() {
 		return null;
 	}
 
-	@Transactional(
-		isolation = Isolation.PORTAL, propagation = Propagation.REQUIRES_NEW,
-		rollbackFor = {Exception.class}
-	)
 	protected void executeAction(Method method) throws Exception {
-		if (method != null) {
-			method.invoke(this);
-		}
+		executeResource(method);
 
 		actionRequest.setAttribute(
 			CALLED_PROCESS_ACTION, Boolean.TRUE.toString());
@@ -353,9 +382,9 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 			(String)request.getAttribute(CALLED_PROCESS_ACTION));
 
 		if (!calledProcessAction) {
-			if (method != null) {
-				method.invoke(this);
-			}
+			executeResource(method);
+
+			addOpenerSuccessMessage();
 		}
 
 		if (Validator.isNull(viewPath)) {
@@ -403,8 +432,41 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 	}
 
 	protected void executeResource(Method method) throws Exception {
-		if (method != null) {
-			method.invoke(this);
+		try {
+			if (method != null) {
+				Class<?> superClass = clazz.getSuperclass();
+
+				Method invokeMethod = superClass.getDeclaredMethod(
+					"invoke", new Class<?>[] {Method.class});
+
+				ServiceBeanMethodInvocationFactoryUtil.proceed(
+					this, BaseAlloyControllerImpl.class, invokeMethod,
+					new Object[] {method}, new String[] {"transactionAdvice"});
+			}
+		}
+		catch (Exception e) {
+			log.error(e, e);
+
+			String message = "an-unexpected-system-error-occurred";
+
+			Throwable rootCause = getRootCause(e);
+
+			if (rootCause instanceof AlloyException) {
+				message = rootCause.getMessage();
+			}
+
+			renderError(HttpServletResponse.SC_BAD_REQUEST, e, message);
+		}
+		finally {
+			if (isRespondingTo()) {
+				String contentType = response.getContentType();
+
+				if (isRespondingTo("json")) {
+					contentType = ContentTypes.APPLICATION_JSON;
+				}
+
+				writeResponse(responseContent, contentType);
+			}
 		}
 	}
 
@@ -474,8 +536,7 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 			Object... attributes)
 		throws Exception {
 
-		Map<String, Serializable> attributesMap =
-			new HashMap<String, Serializable>();
+		Map<String, Serializable> attributesMap = new HashMap<>();
 
 		if ((attributes.length == 0) || ((attributes.length % 2) != 0)) {
 			throw new Exception("Arguments length is not an even number");
@@ -490,6 +551,16 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 		}
 
 		return attributesMap;
+	}
+
+	protected String getStackTrace(Exception e) {
+		StringWriter stringWriter = new StringWriter();
+
+		PrintWriter printWriter = new PrintWriter(stringWriter);
+
+		e.printStackTrace(printWriter);
+
+		return stringWriter.toString();
 	}
 
 	protected boolean hasPermission() {
@@ -656,7 +727,7 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 	}
 
 	protected void initMethods() {
-		methodsMap = new HashMap<String, Method>();
+		methodsMap = new HashMap<>();
 
 		Method[] methods = clazz.getMethods();
 
@@ -704,12 +775,28 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 			log.debug("View path " + viewPath);
 		}
 
+		format = ParamUtil.getString(request, "format");
+
+		if (Validator.isNull(format)) {
+			Map<String, String> defaultRouteParameters =
+				alloyPortlet.getDefaultRouteParameters();
+
+			format = defaultRouteParameters.get("format");
+		}
+
+		if (log.isDebugEnabled()) {
+			log.debug("Format " + format);
+		}
+
 		if (mimeResponse != null) {
 			portletURL = mimeResponse.createRenderURL();
 
 			portletURL.setParameter("action", actionPath);
 			portletURL.setParameter("controller", controllerPath);
-			portletURL.setParameter("format", "html");
+
+			if (Validator.isNotNull(format)) {
+				portletURL.setParameter("format", format);
+			}
 
 			if (log.isDebugEnabled()) {
 				log.debug("Portlet URL " + portletURL);
@@ -778,7 +865,31 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 		user = themeDisplay.getUser();
 	}
 
-	protected String processDataRequest(ActionRequest actionRequest) {
+	@SuppressWarnings("unused")
+	@Transactional(
+		isolation = Isolation.PORTAL, propagation = Propagation.REQUIRES_NEW,
+		rollbackFor = {Exception.class}
+	)
+	protected void invoke(Method method) throws Exception {
+		method.invoke(this);
+	}
+
+	protected boolean isRespondingTo() {
+		return Validator.isNotNull(format);
+	}
+
+	protected boolean isRespondingTo(String format) {
+		return StringUtil.equalsIgnoreCase(this.format, format);
+	}
+
+	@SuppressWarnings("unused")
+	@Transactional(
+		isolation = Isolation.PORTAL, propagation = Propagation.REQUIRES_NEW,
+		rollbackFor = {Exception.class}
+	)
+	protected String processDataRequest(ActionRequest actionRequest)
+		throws Exception {
+
 		return null;
 	}
 
@@ -813,11 +924,80 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 		viewPath = actionPath;
 	}
 
-	protected void renderError(String pattern, Object... arguments) {
+	protected void renderError(
+			int status, Exception e, String pattern, Object... arguments)
+		throws Exception {
+
+		Throwable rootCause = getRootCause(e);
+
+		if (isRespondingTo()) {
+			responseContent = buildResponseContent(
+				rootCause, translate(pattern, arguments), status);
+
+			return;
+		}
+
 		portletRequest.setAttribute("arguments", arguments);
+
+		String stackTrace = getStackTrace((Exception)rootCause);
+
+		portletRequest.setAttribute("data", stackTrace);
+
 		portletRequest.setAttribute("pattern", pattern);
+		portletRequest.setAttribute("status", status);
 
 		render(_VIEW_PATH_ERROR);
+	}
+
+	protected void renderError(int status, String pattern, Object... arguments)
+		throws Exception {
+
+		AlloyException alloyException = new AlloyException(
+			translate("unspecified-cause"));
+
+		renderError(status, alloyException, pattern, arguments);
+	}
+
+	protected void renderError(String pattern, Object... arguments)
+		throws Exception {
+
+		renderError(HttpServletResponse.SC_BAD_REQUEST, pattern, arguments);
+	}
+
+	protected boolean respondWith(int status, Object object) throws Exception {
+		String data = StringPool.BLANK;
+
+		if (isRespondingTo("json")) {
+			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+
+			if (object instanceof AlloySearchResult) {
+				Hits hits = ((AlloySearchResult)object).getHits();
+
+				Document[] documents = hits.getDocs();
+
+				jsonObject.put(controllerPath, toJSONArray(documents));
+			}
+			else if (object instanceof Collection) {
+				Object[] objects =
+					((Collection)object).toArray(new BaseModel[0]);
+
+				jsonObject.put(controllerPath, toJSONArray(objects));
+			}
+			else {
+				jsonObject = toJSONObject(object);
+			}
+
+			data = jsonObject.toString();
+		}
+
+		responseContent = buildResponseContent(data, StringPool.BLANK, status);
+
+		return true;
+	}
+
+	@SuppressWarnings("unused")
+	protected boolean respondWith(Object object) throws Exception {
+		return respondWith(HttpServletResponse.SC_OK, object);
 	}
 
 	protected AlloySearchResult search(
@@ -941,7 +1121,7 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 
 		this.alloyNotificationEventHelper = alloyNotificationEventHelper;
 
-		alloyNotificationEventHelperPayload = null;
+		alloyNotificationEventHelperPayloadJSONObject = null;
 	}
 
 	protected void setAlloyServiceInvokerClass(Class<?> clazz) {
@@ -1003,27 +1183,101 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 		groupedModel.setGroupId(themeDisplay.getScopeGroupId());
 	}
 
+	protected void setOpenerSuccessMessage() {
+		SessionMessages.add(
+			portletRequest,
+			portlet.getPortletId() + SessionMessages.KEY_SUFFIX_REFRESH_PORTLET,
+			portlet.getPortletId());
+
+		Map<String, String> data = new HashMap<>();
+
+		data.put("addSuccessMessage", StringPool.TRUE);
+
+		SessionMessages.add(
+			request,
+			portlet.getPortletId() +
+				SessionMessages.KEY_SUFFIX_REFRESH_PORTLET_DATA, data);
+	}
+
 	protected void setPermissioned(boolean permissioned) {
 		this.permissioned = permissioned;
+	}
+
+	protected JSONArray toJSONArray(Object[] objects) throws Exception {
+		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
+
+		for (Object object : objects) {
+			jsonArray.put(toJSONObject(object));
+		}
+
+		return jsonArray;
+	}
+
+	protected JSONObject toJSONObject(BaseModel<?> baseModel) throws Exception {
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+
+		Map<String, Object> modelAttributes = baseModel.getModelAttributes();
+
+		for (String key : modelAttributes.keySet()) {
+			Object value = modelAttributes.get(key);
+
+			jsonObject.put(String.valueOf(key), String.valueOf(value));
+		}
+
+		return jsonObject;
+	}
+
+	protected JSONObject toJSONObject(Document document) throws Exception {
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+
+		Map<String, Field> fields = document.getFields();
+
+		for (String key : fields.keySet()) {
+			Field field = fields.get(key);
+
+			jsonObject.put(field.getName(), field.getValue());
+		}
+
+		return jsonObject;
+	}
+
+	protected JSONObject toJSONObject(Object object) throws Exception {
+		if (object instanceof BaseModel<?>) {
+			return toJSONObject((BaseModel<?>)object);
+		}
+		else if (object instanceof Document) {
+			return toJSONObject((Document)object);
+		}
+		else if (object instanceof JSONObject) {
+			return (JSONObject)object;
+		}
+
+		throw new AlloyException(
+			"Unable to convert " + object + " to a JSON object");
 	}
 
 	protected String translate(String pattern, Object... arguments) {
 		return LanguageUtil.format(locale, pattern, arguments);
 	}
 
-	protected void writeJSON(Object json) throws Exception {
+	protected void writeResponse(Object content, String contentType)
+		throws Exception {
+
 		if (actionResponse != null) {
 			HttpServletResponse response = PortalUtil.getHttpServletResponse(
 				actionResponse);
 
-			response.setContentType(ContentTypes.APPLICATION_JSON);
+			response.setContentType(contentType);
 
-			ServletResponseUtil.write(response, json.toString());
+			ServletResponseUtil.write(response, content.toString());
 		}
-		else if (mimeResponse != null) {
-			mimeResponse.setContentType(ContentTypes.APPLICATION_JSON);
+		else if (renderResponse != null) {
+			renderResponse.setContentType(contentType);
 
-			PortletResponseUtil.write(mimeResponse, json.toString());
+			HttpServletResponse response = PortalUtil.getHttpServletResponse(
+				renderResponse);
+
+			ServletResponseUtil.write(response, content.toString());
 		}
 	}
 
@@ -1040,7 +1294,7 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 	protected ActionRequest actionRequest;
 	protected ActionResponse actionResponse;
 	protected AlloyNotificationEventHelper alloyNotificationEventHelper;
-	protected Object alloyNotificationEventHelperPayload;
+	protected JSONObject alloyNotificationEventHelperPayloadJSONObject;
 	protected AlloyPortlet alloyPortlet;
 	protected AlloyServiceInvoker alloyServiceInvoker;
 	protected ClassLoader classLoader;
@@ -1050,6 +1304,7 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 	protected String controllerPath;
 	protected EventRequest eventRequest;
 	protected EventResponse eventResponse;
+	protected String format;
 	protected Indexer indexer;
 	protected String indexerClassName;
 	protected String lifecycle;
@@ -1072,6 +1327,7 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 	protected ResourceRequest resourceRequest;
 	protected ResourceResponse resourceResponse;
 	protected HttpServletResponse response;
+	protected String responseContent = StringPool.BLANK;
 	protected MessageListener schedulerMessageListener;
 	protected ServletConfig servletConfig;
 	protected ServletContext servletContext;

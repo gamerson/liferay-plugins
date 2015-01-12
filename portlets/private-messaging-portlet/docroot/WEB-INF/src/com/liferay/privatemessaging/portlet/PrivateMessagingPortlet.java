@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletResponseUtil;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.CharPool;
@@ -54,7 +55,6 @@ import com.liferay.portlet.messageboards.service.MBMessageLocalServiceUtil;
 import com.liferay.privatemessaging.service.UserThreadLocalServiceUtil;
 import com.liferay.privatemessaging.util.PortletPropsValues;
 import com.liferay.privatemessaging.util.PrivateMessagingUtil;
-import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -196,7 +196,7 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 		String subject = ParamUtil.getString(uploadPortletRequest, "subject");
 		String body = ParamUtil.getString(uploadPortletRequest, "body");
 		List<ObjectValuePair<String, InputStream>> inputStreamOVPs =
-			new ArrayList<ObjectValuePair<String, InputStream>>();
+			new ArrayList<>();
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
@@ -422,7 +422,7 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 
 		String[] recipients = StringUtil.split(to);
 
-		List<String> failedRecipients = new ArrayList<String>();
+		List<String> failedRecipients = new ArrayList<>();
 
 		for (String recipient : recipients) {
 			recipient = recipient.trim();

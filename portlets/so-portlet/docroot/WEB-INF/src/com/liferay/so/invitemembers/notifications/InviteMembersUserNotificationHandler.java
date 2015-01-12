@@ -66,7 +66,14 @@ public class InviteMembersUserNotificationHandler
 		MemberRequest memberRequest =
 			MemberRequestLocalServiceUtil.fetchMemberRequest(memberRequestId);
 
-		if (memberRequest == null) {
+		Group group = null;
+
+		if (memberRequest != null) {
+			group = GroupLocalServiceUtil.fetchGroup(
+				memberRequest.getGroupId());
+		}
+
+		if ((group == null) || (memberRequest == null)) {
 			UserNotificationEventLocalServiceUtil.deleteUserNotificationEvent(
 				userNotificationEvent.getUserNotificationEventId());
 
@@ -156,7 +163,7 @@ public class InviteMembersUserNotificationHandler
 				serviceContext.getLiferayPortletResponse();
 
 			PortletURL portletURL = liferayPortletResponse.createActionURL(
-				PortletKeys.MY_SITES);
+				PortletKeys.SITE_REDIRECTOR);
 
 			portletURL.setWindowState(WindowState.NORMAL);
 

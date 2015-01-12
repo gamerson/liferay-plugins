@@ -21,7 +21,7 @@ import com.liferay.portal.service.ServiceWrapper;
 /**
  * Provides a wrapper for {@link PushNotificationsEntryLocalService}.
  *
- * @author Silvio Santos
+ * @author Bruno Farache
  * @see PushNotificationsEntryLocalService
  * @generated
  */
@@ -49,9 +49,18 @@ public class PushNotificationsEntryLocalServiceWrapper
 	@Override
 	public com.liferay.pushnotifications.model.PushNotificationsEntry addPushNotificationsEntry(
 		long userId, long parentPushNotificationsEntryId,
-		com.liferay.portal.kernel.json.JSONObject payloadJSONObject) {
+		com.liferay.portal.kernel.json.JSONObject payloadJSONObject)
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _pushNotificationsEntryLocalService.addPushNotificationsEntry(userId,
 			parentPushNotificationsEntryId, payloadJSONObject);
+	}
+
+	@Override
+	public com.liferay.pushnotifications.model.PushNotificationsEntry addPushNotificationsEntry(
+		long userId, com.liferay.portal.kernel.json.JSONObject payloadJSONObject)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _pushNotificationsEntryLocalService.addPushNotificationsEntry(userId,
+			payloadJSONObject);
 	}
 
 	/**
@@ -162,10 +171,10 @@ public class PushNotificationsEntryLocalServiceWrapper
 	}
 
 	/**
-	* Returns the number of rows that match the dynamic query.
+	* Returns the number of rows matching the dynamic query.
 	*
 	* @param dynamicQuery the dynamic query
-	* @return the number of rows that match the dynamic query
+	* @return the number of rows matching the dynamic query
 	*/
 	@Override
 	public long dynamicQueryCount(
@@ -174,11 +183,11 @@ public class PushNotificationsEntryLocalServiceWrapper
 	}
 
 	/**
-	* Returns the number of rows that match the dynamic query.
+	* Returns the number of rows matching the dynamic query.
 	*
 	* @param dynamicQuery the dynamic query
 	* @param projection the projection to apply to the query
-	* @return the number of rows that match the dynamic query
+	* @return the number of rows matching the dynamic query
 	*/
 	@Override
 	public long dynamicQueryCount(
@@ -214,6 +223,14 @@ public class PushNotificationsEntryLocalServiceWrapper
 		java.io.Serializable primaryKeyObj)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _pushNotificationsEntryLocalService.getPersistedModel(primaryKeyObj);
+	}
+
+	@Override
+	public java.util.List<com.liferay.pushnotifications.model.PushNotificationsEntry> getPushNotificationsEntries(
+		long parentPushNotificationsEntryId, long lastAccessTime, int start,
+		int end) throws com.liferay.portal.kernel.exception.PortalException {
+		return _pushNotificationsEntryLocalService.getPushNotificationsEntries(parentPushNotificationsEntryId,
+			lastAccessTime, start, end);
 	}
 
 	/**
@@ -267,19 +284,19 @@ public class PushNotificationsEntryLocalServiceWrapper
 	}
 
 	@Override
-	public void sendPushNotification(
-		com.liferay.portal.kernel.json.JSONObject jsonObject, int start, int end)
+	public com.liferay.pushnotifications.model.PushNotificationsEntry likePushNotificationsEntry(
+		long userId, long pushNotificationsEntryId)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		_pushNotificationsEntryLocalService.sendPushNotification(jsonObject,
-			start, end);
+		return _pushNotificationsEntryLocalService.likePushNotificationsEntry(userId,
+			pushNotificationsEntryId);
 	}
 
 	@Override
-	public void sendPushNotification(long toUserId,
-		com.liferay.portal.kernel.json.JSONObject jsonObject, int start, int end)
+	public void sendPushNotification(long fromUserId,
+		com.liferay.pushnotifications.model.PushNotificationsEntry pushNotificationsEntry)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		_pushNotificationsEntryLocalService.sendPushNotification(toUserId,
-			jsonObject, start, end);
+		_pushNotificationsEntryLocalService.sendPushNotification(fromUserId,
+			pushNotificationsEntry);
 	}
 
 	/**
@@ -290,6 +307,21 @@ public class PushNotificationsEntryLocalServiceWrapper
 	@Override
 	public void setBeanIdentifier(java.lang.String beanIdentifier) {
 		_pushNotificationsEntryLocalService.setBeanIdentifier(beanIdentifier);
+	}
+
+	@Override
+	public com.liferay.pushnotifications.model.PushNotificationsEntry unlikePushNotificationsEntry(
+		long userId, long pushNotificationsEntryId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _pushNotificationsEntryLocalService.unlikePushNotificationsEntry(userId,
+			pushNotificationsEntryId);
+	}
+
+	@Override
+	public com.liferay.pushnotifications.model.PushNotificationsEntry updateChildrenPushNotificationsEntriesCount(
+		long parentPushNotificationsEntryId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _pushNotificationsEntryLocalService.updateChildrenPushNotificationsEntriesCount(parentPushNotificationsEntryId);
 	}
 
 	/**

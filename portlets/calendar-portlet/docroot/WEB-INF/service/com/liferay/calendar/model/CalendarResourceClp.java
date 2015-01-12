@@ -848,6 +848,25 @@ public class CalendarResourceClp extends BaseModelImpl<CalendarResource>
 	}
 
 	@Override
+	public java.util.TimeZone getTimeZone() {
+		try {
+			String methodName = "getTimeZone";
+
+			Class<?>[] parameterTypes = new Class<?>[] {  };
+
+			Object[] parameterValues = new Object[] {  };
+
+			java.util.TimeZone returnObj = (java.util.TimeZone)invokeOnRemoteModel(methodName,
+					parameterTypes, parameterValues);
+
+			return returnObj;
+		}
+		catch (Exception e) {
+			throw new UnsupportedOperationException(e);
+		}
+	}
+
+	@Override
 	public boolean isUser() {
 		try {
 			String methodName = "isUser";
@@ -876,6 +895,25 @@ public class CalendarResourceClp extends BaseModelImpl<CalendarResource>
 			Object[] parameterValues = new Object[] {  };
 
 			Long returnObj = (Long)invokeOnRemoteModel(methodName,
+					parameterTypes, parameterValues);
+
+			return returnObj;
+		}
+		catch (Exception e) {
+			throw new UnsupportedOperationException(e);
+		}
+	}
+
+	@Override
+	public java.lang.String getTimeZoneId() {
+		try {
+			String methodName = "getTimeZoneId";
+
+			Class<?>[] parameterTypes = new Class<?>[] {  };
+
+			Object[] parameterValues = new Object[] {  };
+
+			java.lang.String returnObj = (java.lang.String)invokeOnRemoteModel(methodName,
 					parameterTypes, parameterValues);
 
 			return returnObj;

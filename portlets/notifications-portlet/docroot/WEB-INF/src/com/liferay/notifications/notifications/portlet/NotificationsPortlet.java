@@ -48,6 +48,7 @@ import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.util.ContentUtil;
 
+import java.text.DateFormat;
 import java.text.Format;
 
 import java.util.ArrayList;
@@ -200,9 +201,27 @@ public class NotificationsPortlet extends MVCPortlet {
 
 		try {
 			List<UserNotificationEvent> userNotificationEvents =
-				UserNotificationEventLocalServiceUtil.
-					getDeliveredUserNotificationEvents(
-						themeDisplay.getUserId(), false);
+				new ArrayList<>();
+
+			if (PortletPropsValues.USER_NOTIFICATION_DOCKBAR_SPLIT) {
+				boolean actionable = ParamUtil.getBoolean(
+					actionRequest, "actionable");
+
+				userNotificationEvents.addAll(
+					UserNotificationEventLocalServiceUtil.
+						getDeliveredUserNotificationEvents(
+							themeDisplay.getUserId(),
+							UserNotificationDeliveryConstants.TYPE_WEBSITE,
+							false, actionable));
+			}
+			else {
+				userNotificationEvents.addAll(
+					UserNotificationEventLocalServiceUtil.
+						getDeliveredUserNotificationEvents(
+							themeDisplay.getUserId(),
+							UserNotificationDeliveryConstants.TYPE_WEBSITE,
+							false));
+			}
 
 			for (UserNotificationEvent userNotificationEvent :
 					userNotificationEvents) {
@@ -276,6 +295,8 @@ public class NotificationsPortlet extends MVCPortlet {
 		catch (Exception e) {
 			jsonObject.put("success", Boolean.FALSE);
 		}
+
+		writeJSON(actionRequest, actionResponse, jsonObject);
 	}
 
 	protected static String getIconMenuDiv(String listItems) {
@@ -390,26 +411,76 @@ public class NotificationsPortlet extends MVCPortlet {
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
 		try {
-			int newUserNotificationsCount =
-				UserNotificationEventLocalServiceUtil.
-					getDeliveredUserNotificationEventsCount(
-						themeDisplay.getUserId(),
-						UserNotificationDeliveryConstants.TYPE_WEBSITE, false);
-
-			jsonObject.put(
-				"newUserNotificationsCount", newUserNotificationsCount);
-
 			jsonObject.put(
 				"timestamp", String.valueOf(System.currentTimeMillis()));
 
-			int unreadUserNotificationsCount =
-				UserNotificationEventLocalServiceUtil.
-					getArchivedUserNotificationEventsCount(
-						themeDisplay.getUserId(),
-						UserNotificationDeliveryConstants.TYPE_WEBSITE, false);
+			if (PortletPropsValues.USER_NOTIFICATION_DOCKBAR_SPLIT) {
+				int newActionableUserNotificationsCount =
+					UserNotificationEventLocalServiceUtil.
+						getDeliveredUserNotificationEventsCount(
+							themeDisplay.getUserId(),
+							UserNotificationDeliveryConstants.TYPE_WEBSITE,
+							false, true);
 
-			jsonObject.put(
-				"unreadUserNotificationsCount", unreadUserNotificationsCount);
+				jsonObject.put(
+					"newActionableUserNotificationsCount",
+					newActionableUserNotificationsCount);
+
+				int newNonactionableUserNotificationsCount =
+					UserNotificationEventLocalServiceUtil.
+						getDeliveredUserNotificationEventsCount(
+							themeDisplay.getUserId(),
+							UserNotificationDeliveryConstants.TYPE_WEBSITE,
+							false, false);
+
+				jsonObject.put(
+					"newNonactionableUserNotificationsCount",
+					newNonactionableUserNotificationsCount);
+
+				int unreadActionableUserNotificationsCount =
+					UserNotificationEventLocalServiceUtil.
+						getArchivedUserNotificationEventsCount(
+							themeDisplay.getUserId(),
+							UserNotificationDeliveryConstants.TYPE_WEBSITE,
+							true, false);
+
+				jsonObject.put(
+					"unreadActionableUserNotificationsCount",
+					unreadActionableUserNotificationsCount);
+
+				int unreadNonactionableUserNotificationsCount =
+					UserNotificationEventLocalServiceUtil.
+						getArchivedUserNotificationEventsCount(
+							themeDisplay.getUserId(),
+							UserNotificationDeliveryConstants.TYPE_WEBSITE,
+							false, false);
+
+				jsonObject.put(
+					"unreadNonactionableUserNotificationsCount",
+					unreadNonactionableUserNotificationsCount);
+			}
+			else {
+				int newUserNotificationsCount =
+					UserNotificationEventLocalServiceUtil.
+						getDeliveredUserNotificationEventsCount(
+							themeDisplay.getUserId(),
+							UserNotificationDeliveryConstants.TYPE_WEBSITE,
+							false);
+
+				jsonObject.put(
+					"newUserNotificationsCount", newUserNotificationsCount);
+
+				int unreadUserNotificationsCount =
+					UserNotificationEventLocalServiceUtil.
+						getArchivedUserNotificationEventsCount(
+							themeDisplay.getUserId(),
+							UserNotificationDeliveryConstants.TYPE_WEBSITE,
+							false);
+
+				jsonObject.put(
+					"unreadUserNotificationsCount",
+					unreadUserNotificationsCount);
+			}
 
 			jsonObject.put("success", Boolean.TRUE);
 		}
@@ -469,7 +540,7 @@ public class NotificationsPortlet extends MVCPortlet {
 
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
-		List<Long> newUserNotificationEventIds = new ArrayList<Long>();
+		List<Long> newUserNotificationEventIds = new ArrayList<>();
 
 		for (UserNotificationEvent userNotificationEvent :
 				userNotificationEvents) {
@@ -545,9 +616,8 @@ public class NotificationsPortlet extends MVCPortlet {
 			actionURL.setParameter(
 				"javax.portlet.action", "deleteUserNotificationEvent");
 
-			actionDiv =
-				StringUtil.replace(
-					_DELETE_DIV, "[$DELETE_URL$]", actionURL.toString());
+			actionDiv = StringUtil.replace(
+				_DELETE_DIV, "[$DELETE_URL$]", actionURL.toString());
 		}
 		else {
 			actionURL.setParameter("javax.portlet.action", "markAsRead");
@@ -569,17 +639,11 @@ public class NotificationsPortlet extends MVCPortlet {
 				userNotificationEvent, liferayPortletResponse, themeDisplay);
 		}
 
-		Portlet portlet =
-			PortletLocalServiceUtil.getPortletById(
-				themeDisplay.getCompanyId(), userNotificationEvent.getType());
+		Portlet portlet = PortletLocalServiceUtil.getPortletById(
+			themeDisplay.getCompanyId(), userNotificationEvent.getType());
 
 		String portletName = portlet.getDisplayName();
 		String portletIcon = portlet.getContextPath() + portlet.getIcon();
-
-		Format simpleDateFormat =
-			FastDateFormatFactoryUtil.getSimpleDateFormat(
-				"EEEE, MMMMM dd, yyyy 'at' h:mm a", themeDisplay.getLocale(),
-				themeDisplay.getTimeZone());
 
 		JSONObject userNotificationEventJSONObject =
 			JSONFactoryUtil.createJSONObject(
@@ -598,6 +662,16 @@ public class NotificationsPortlet extends MVCPortlet {
 			userPortraitURL = user.getPortraitURL(themeDisplay);
 		}
 
+		Format dateFormatDate =
+			FastDateFormatFactoryUtil.getDate(
+				DateFormat.FULL, themeDisplay.getLocale(),
+				themeDisplay.getTimeZone());
+
+		Format dateTimeFormat =
+			FastDateFormatFactoryUtil.getDateTime(
+				DateFormat.FULL, DateFormat.SHORT, themeDisplay.getLocale(),
+				themeDisplay.getTimeZone());
+
 		return StringUtil.replace(
 			ContentUtil.get(PortletPropsValues.USER_NOTIFICATION_ENTRY),
 			new String[] {
@@ -609,8 +683,9 @@ public class NotificationsPortlet extends MVCPortlet {
 				iconMenu, portletIcon, portletName,
 				Time.getRelativeTimeDescription(
 					userNotificationEvent.getTimestamp(),
-					themeDisplay.getLocale(), themeDisplay.getTimeZone()),
-				simpleDateFormat.format(userNotificationEvent.getTimestamp()),
+					themeDisplay.getLocale(), themeDisplay.getTimeZone(),
+					dateFormatDate),
+				dateTimeFormat.format(userNotificationEvent.getTimestamp()),
 				userFullName, userPortraitURL});
 	}
 

@@ -14,6 +14,7 @@
 
 package com.liferay.jsonwebserviceclient;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -25,8 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.security.auth.login.CredentialException;
-
 /**
  * @author Igor Beslic
  */
@@ -34,10 +33,13 @@ public abstract class BaseJSONWebServiceClientHandler {
 
 	public abstract JSONWebServiceClient getJSONWebServiceClient();
 
-	protected String doGet(String url, String... parametersArray)
-		throws CredentialException, IOException {
+	protected BaseJSONWebServiceClientHandler() {
+		_objectMapper.configure(
+			DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	}
 
-		Map<String, String> parameters = new HashMap<String, String>();
+	protected String doGet(String url, String... parametersArray) {
+		Map<String, String> parameters = new HashMap<>();
 
 		for (int i = 0; i < parametersArray.length; i += 2) {
 			parameters.put(parametersArray[i], parametersArray[i + 1]);
@@ -48,7 +50,7 @@ public abstract class BaseJSONWebServiceClientHandler {
 
 	protected <T> List<T> doGetToList(
 			Class<T> clazz, String url, String... parametersArray)
-		throws Exception {
+		throws JSONWebServiceInvocationException {
 
 		String json = doGet(url, parametersArray);
 
@@ -59,52 +61,67 @@ public abstract class BaseJSONWebServiceClientHandler {
 		}
 
 		if (json.contains("exception\":\"")) {
-			throw new Exception(getExceptionMessage(json));
+			throw new JSONWebServiceInvocationException(
+				getExceptionMessage(json));
 		}
 
-		TypeFactory typeFactory = _objectMapper.getTypeFactory();
+		try {
+			TypeFactory typeFactory = _objectMapper.getTypeFactory();
 
-		JavaType javaType = typeFactory.constructCollectionType(
-			List.class, clazz);
+			JavaType javaType = typeFactory.constructCollectionType(
+				List.class, clazz);
 
-		return _objectMapper.readValue(json, javaType);
+			return _objectMapper.readValue(json, javaType);
+		}
+		catch (IOException ie) {
+			throw new JSONWebServiceInvocationException(ie);
+		}
 	}
 
 	protected <T> T doGetToObject(
 			Class<T> clazz, String url, String... parametersArray)
-		throws Exception {
+		throws JSONWebServiceInvocationException {
 
 		String json = doGet(url, parametersArray);
 
-		if ((json == null) || json.equals("")) {
+		if ((json == null) || json.equals("") || json.equals("{}")) {
 			return null;
 		}
 
 		if (json.contains("exception\":\"")) {
-			throw new Exception(getExceptionMessage(json));
+			throw new JSONWebServiceInvocationException(
+				getExceptionMessage(json));
 		}
 
-		return _objectMapper.readValue(json, clazz);
+		try {
+			return _objectMapper.readValue(json, clazz);
+		}
+		catch (IOException ie) {
+			throw new JSONWebServiceInvocationException(ie);
+		}
 	}
 
-	protected void doPost(String url, String... parametersArray)
-		throws CredentialException, IOException {
-
-		Map<String, String> parameters = new HashMap<String, String>();
+	protected String doPost(String url, String... parametersArray) {
+		Map<String, String> parameters = new HashMap<>();
 
 		for (int i = 0; i < parametersArray.length; i += 2) {
 			parameters.put(parametersArray[i], parametersArray[i + 1]);
 		}
 
-		getJSONWebServiceClient().doPost(url, parameters);
+		return getJSONWebServiceClient().doPost(url, parameters);
 	}
 
-	protected void doPostAsJSON(String url, Object object)
-		throws CredentialException, IOException {
+	protected String doPostAsJSON(String url, Object object)
+		throws JSONWebServiceInvocationException {
 
-		String json = _objectMapper.writeValueAsString(object);
+		try {
+			String json = _objectMapper.writeValueAsString(object);
 
-		getJSONWebServiceClient().doPostAsJSON(url, json);
+			return getJSONWebServiceClient().doPostAsJSON(url, json);
+		}
+		catch (IOException ie) {
+			throw new JSONWebServiceInvocationException(ie);
+		}
 	}
 
 	protected String getExceptionMessage(String json) {

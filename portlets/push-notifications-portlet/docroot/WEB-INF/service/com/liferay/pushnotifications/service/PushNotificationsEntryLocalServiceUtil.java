@@ -28,7 +28,7 @@ import com.liferay.portal.service.InvokableLocalService;
  * based on the propagated JAAS credentials because this service can only be
  * accessed from within the same VM.
  *
- * @author Silvio Santos
+ * @author Bruno Farache
  * @see PushNotificationsEntryLocalService
  * @see com.liferay.pushnotifications.service.base.PushNotificationsEntryLocalServiceBaseImpl
  * @see com.liferay.pushnotifications.service.impl.PushNotificationsEntryLocalServiceImpl
@@ -55,10 +55,17 @@ public class PushNotificationsEntryLocalServiceUtil {
 
 	public static com.liferay.pushnotifications.model.PushNotificationsEntry addPushNotificationsEntry(
 		long userId, long parentPushNotificationsEntryId,
-		com.liferay.portal.kernel.json.JSONObject payloadJSONObject) {
+		com.liferay.portal.kernel.json.JSONObject payloadJSONObject)
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addPushNotificationsEntry(userId,
 			parentPushNotificationsEntryId, payloadJSONObject);
+	}
+
+	public static com.liferay.pushnotifications.model.PushNotificationsEntry addPushNotificationsEntry(
+		long userId, com.liferay.portal.kernel.json.JSONObject payloadJSONObject)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().addPushNotificationsEntry(userId, payloadJSONObject);
 	}
 
 	/**
@@ -162,10 +169,10 @@ public class PushNotificationsEntryLocalServiceUtil {
 	}
 
 	/**
-	* Returns the number of rows that match the dynamic query.
+	* Returns the number of rows matching the dynamic query.
 	*
 	* @param dynamicQuery the dynamic query
-	* @return the number of rows that match the dynamic query
+	* @return the number of rows matching the dynamic query
 	*/
 	public static long dynamicQueryCount(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
@@ -173,11 +180,11 @@ public class PushNotificationsEntryLocalServiceUtil {
 	}
 
 	/**
-	* Returns the number of rows that match the dynamic query.
+	* Returns the number of rows matching the dynamic query.
 	*
 	* @param dynamicQuery the dynamic query
 	* @param projection the projection to apply to the query
-	* @return the number of rows that match the dynamic query
+	* @return the number of rows matching the dynamic query
 	*/
 	public static long dynamicQueryCount(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery,
@@ -207,6 +214,14 @@ public class PushNotificationsEntryLocalServiceUtil {
 		java.io.Serializable primaryKeyObj)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getPersistedModel(primaryKeyObj);
+	}
+
+	public static java.util.List<com.liferay.pushnotifications.model.PushNotificationsEntry> getPushNotificationsEntries(
+		long parentPushNotificationsEntryId, long lastAccessTime, int start,
+		int end) throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .getPushNotificationsEntries(parentPushNotificationsEntryId,
+			lastAccessTime, start, end);
 	}
 
 	/**
@@ -253,16 +268,17 @@ public class PushNotificationsEntryLocalServiceUtil {
 		return getService().invokeMethod(name, parameterTypes, arguments);
 	}
 
-	public static void sendPushNotification(
-		com.liferay.portal.kernel.json.JSONObject jsonObject, int start, int end)
+	public static com.liferay.pushnotifications.model.PushNotificationsEntry likePushNotificationsEntry(
+		long userId, long pushNotificationsEntryId)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		getService().sendPushNotification(jsonObject, start, end);
+		return getService()
+				   .likePushNotificationsEntry(userId, pushNotificationsEntryId);
 	}
 
-	public static void sendPushNotification(long toUserId,
-		com.liferay.portal.kernel.json.JSONObject jsonObject, int start, int end)
+	public static void sendPushNotification(long fromUserId,
+		com.liferay.pushnotifications.model.PushNotificationsEntry pushNotificationsEntry)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		getService().sendPushNotification(toUserId, jsonObject, start, end);
+		getService().sendPushNotification(fromUserId, pushNotificationsEntry);
 	}
 
 	/**
@@ -272,6 +288,21 @@ public class PushNotificationsEntryLocalServiceUtil {
 	*/
 	public static void setBeanIdentifier(java.lang.String beanIdentifier) {
 		getService().setBeanIdentifier(beanIdentifier);
+	}
+
+	public static com.liferay.pushnotifications.model.PushNotificationsEntry unlikePushNotificationsEntry(
+		long userId, long pushNotificationsEntryId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .unlikePushNotificationsEntry(userId,
+			pushNotificationsEntryId);
+	}
+
+	public static com.liferay.pushnotifications.model.PushNotificationsEntry updateChildrenPushNotificationsEntriesCount(
+		long parentPushNotificationsEntryId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .updateChildrenPushNotificationsEntriesCount(parentPushNotificationsEntryId);
 	}
 
 	/**

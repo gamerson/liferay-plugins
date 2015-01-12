@@ -49,7 +49,6 @@ import com.liferay.portal.webserver.WebServerServletTokenUtil;
 import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.messageboards.model.MBMessageConstants;
 import com.liferay.portlet.messageboards.service.MBMessageLocalServiceUtil;
-import com.liferay.portlet.messageboards.service.MBThreadLocalServiceUtil;
 import com.liferay.privatemessaging.model.UserThread;
 import com.liferay.privatemessaging.portlet.PrivateMessagingPortlet;
 import com.liferay.privatemessaging.service.UserThreadLocalServiceUtil;
@@ -118,7 +117,7 @@ public class UserThreadLocalServiceImpl extends UserThreadLocalServiceBaseImpl {
 		MBMessage parentMessage = MBMessageLocalServiceUtil.getMBMessage(
 			parentMBMessageId);
 
-		List<User> recipients = new ArrayList<User>();
+		List<User> recipients = new ArrayList<>();
 
 		recipients.add(UserLocalServiceUtil.getUser(parentMessage.getUserId()));
 
@@ -357,7 +356,7 @@ public class UserThreadLocalServiceImpl extends UserThreadLocalServiceBaseImpl {
 
 		String[] recipients = StringUtil.split(to);
 
-		List<User> users = new ArrayList<User>();
+		List<User> users = new ArrayList<>();
 
 		for (String recipient : recipients) {
 			int x = recipient.indexOf(CharPool.LESS_THAN);

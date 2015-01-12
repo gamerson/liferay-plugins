@@ -18,12 +18,13 @@
 package com.liferay.so.sites.portlet;
 
 import com.liferay.portal.DuplicateGroupException;
-import com.liferay.portal.GroupNameException;
+import com.liferay.portal.GroupKeyException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.util.ClassResolverUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -66,7 +67,6 @@ import com.liferay.so.service.SocialOfficeServiceUtil;
 import com.liferay.so.sites.util.SitesUtil;
 import com.liferay.so.util.GroupConstants;
 import com.liferay.so.util.PortletKeys;
-import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,7 +113,7 @@ public class SitesPortlet extends MVCPortlet {
 				if (e instanceof DuplicateGroupException) {
 					message = "please-enter-a-unique-name";
 				}
-				else if (e instanceof GroupNameException) {
+				else if (e instanceof GroupKeyException) {
 					message = "please-enter-a-valid-name";
 				}
 				else {
@@ -599,7 +599,7 @@ public class SitesPortlet extends MVCPortlet {
 
 		long[] deleteLayoutIds = getLongArray(actionRequest, "deleteLayoutIds");
 
-		List<Layout> layouts = new ArrayList<Layout>(deleteLayoutIds.length);
+		List<Layout> layouts = new ArrayList<>(deleteLayoutIds.length);
 
 		for (long deleteLayoutId : deleteLayoutIds) {
 			Layout layout = LayoutLocalServiceUtil.getLayout(
